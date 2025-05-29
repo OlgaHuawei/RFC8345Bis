@@ -1,0 +1,306 @@
+module ietf-simap-topology {
+  yang-version 1.1;
+  namespace "urn:ietf:params:xml:ns:yang:ietf-simap-topology";
+  prefix st;
+
+  import ietf-network {
+    prefix nw;
+    reference
+      "RFC 8345: A YANG Data Model for Network Topologies";
+  }
+
+  import ietf-network-topology {
+    prefix nt;
+    reference
+      "RFC 8345: A YANG Data Model for Network Topologies";
+  }
+
+  organization
+    "Network Management Operations (NMOP) Working Group";
+
+  contact
+    "WG Web:    <https://datatracker.ietf.org/group/nmop/>
+     WG List:   <mailto:nmop@ietf.org>
+
+     Editor:    Olga Havel
+                <mailto:havel.olga@huawei.com>
+
+     Editor:    Nigel Davis
+                <mailto:ndavis@ciena.com>
+
+     Editor:    TODO
+                <mailto:TODO>";
+
+
+  description
+    "This module defines the SIMAP core topology model based on the
+     requirements defined in https://datatracker.ietf.org/doc/draft-ietf-nmop-simap-concept/.
+     We identified the gaps between the RFC8345 and the requirements and they are implemented
+     temporarily in this module. There are multiple options how these gaps can be modelled, this module here
+     is just a starting point for discussion which is the best way to proceed:
+         APPROACH-AUGMENT: via new simap module that augments rfc8345 modules (ietf-network and ietf-network-topology)
+         APPROACH-BIS: via RFC8345 bis module - fully backward compatible with RFC8345 for ietf-network and
+                   ietf-network-topology modules
+         APPROACH-NEW: via new simap module that does not augment rfc8345 modules
+         APPROACH-NEW-TREE: use similar approach to RFC8345 modules, but dont keep backward compatibility  and
+                           optimize the module
+         APPROACH-NEW-GRAPH: use different approach (e.g. not a tree but graph approach)
+
+    The following are identified gaps in https://datatracker.ietf.org/doc/draft-havel-nmop-digital-map/02/:
+    RFC8345-GAP-BIDIR: must support bidirectional links
+       - RFC8345 supports only unidirectional links, it was done intentionally to keep the model as simple as possible
+       - RFC8345 suggests to model bidirectional links via multiple instances of unidirectional links
+       - while keeping the model simpler in RFC8345, the APIs and data become more complex. There is increase of number
+         of instances / data transferred over API, stored in the DB, or managed/monitored
+       - while keeping the model simpler in RFC8345, we lack the semantics for the bidirectional links
+
+    RFC8345-GAP-MULTI-POINT: must support multi-point connectivity
+       - RFC8345 defines all links as point to point and unidirectional,
+         it does not support multi-point links (hub and spoke, full mesh,
+         complex).  It was done intentionally to keep the model as simple as
+         possible.
+       - RFC8345 suggests to model the multi-point networks via pseudo nodes.
+       - while keeping the model simpler in RFC8345, the APIs and data become more complex. There is increase of number
+         of instances / data transferred over API, stored in the DB, or managed/monitored.
+       - while keeping the model simpler in RFC8345, we lack the semantics for multi-point links
+
+    RFC8345-GAP-MULTI-DOMAIN:  must support links between different networks
+       - RFC8345 defines all links as belonging to one network instance and having the source and destination as
+         node and termination point only, not allowing to link to termination point of another network.
+       - This does not allow for links between networks in the case of multi-domains or partitioning.
+       - The only way would be to model each domain as node and have links between them
+
+    RFC8345-GAP-SUBNETWORK: must support network decomposition into sub-networks
+
+    RFC8345-GAP-MULTI-NETWORK: must support nodes, links and tps belonging to different networks
+
+    RFC8345-GAP-SUPPORTING: must support 'supporting' relation between different types of entities
+
+    RFC8345-GAP-SEMANTIC: must support the semantics for the common topologies and connectivity
+
+    The following are the requirements that we will address in this module, some are based on the identified gaps
+    during PoCs/Hackathons, some are coming directly from the operators, see
+    https://datatracker.ietf.org/doc/draft-ietf-nmop-simap-concept/:
+    - REQ-BIDIR for the RFC8345-GAP-BIDIR
+    - REQ-MULTI-POINT for the RFC8345-GAP-MULTI-POINT
+    - REQ-MULTI-DOMAIN for the RFC8345-GAP-MULTI-DOMAIN
+    - REQ-SUBNETWORK for the
+
+
+
+     Copyright (c) 2025 IETF Trust and the persons identified as
+     authors of the code.  All rights reserved.
+
+     Redistribution and use in source and binary forms, with or
+     without modification, is permitted pursuant to, and subject to
+     the license terms contained in, the Simplified BSD License set
+     forth in Section 4.c of the IETF Trust's Legal Provisions
+     Relating to IETF Documents
+     (https://trustee.ietf.org/license-info).
+
+     This version of this YANG module is part of RFC XXXX
+     (https://www.rfc-editor.org/info/rfcXXXX); see the RFC itself
+     for full legal notices.
+
+    ";
+
+  revision 2025-01-01 {
+    description
+      "Initial revision.";
+    reference
+      "XXX: A YANG Data Model for SIMAP Core Topologies";
+  }
+
+  /*
+   * Identities related to link directionality and cardinality of points
+   */
+
+  identity link-direction {
+    description "Base identity for the directionality of the link";
+  }
+
+  identity link-direction-uni {
+    base "st:link-direction";
+    description "Unidirectional link";
+  }
+
+  identity link-direction-bi {
+    base "st:link-direction";
+    description "Bidirectional link";
+  }
+
+  identity link-type {
+      description "Base identity for the internal structure of the link";
+  }
+
+  identity link-type-p2p {
+      base "st:link-type";
+      description "Point to point link";
+  }
+
+  identity link-type-p2mp {
+      base "st:link-type";
+      description "Point to multi-point link";
+  }
+
+  identity link-type-mp2mp {
+      base "st:link-type";
+      description "Multi-point to multi-point link";
+  }
+
+  /*
+   * Identities related to termination point directionality and role in the link
+   */
+
+  identity tp-direction {
+    description "Base identity for the directionality of the tp";
+  }
+
+  identity tp-direction-symmetric {
+    base "st:tp-direction";
+    description "TP in the bidirectional link";
+  }
+
+  identity tp-direction-source {
+    base "st:tp-direction";
+    description "TP is the source tp in the link";
+  }
+
+  identity tp-direction-destination {
+    base "st:tp-direction";
+    description "TP is the destination tp in the link";
+  }
+
+  identity tp-role {
+    description "Base identity from which all tp roles in the link are derived.";
+  }
+
+  /*
+   * Common SIMAP groupings for optional RFC8345 extensions
+   */
+  grouping simap-common {
+    description "A reusable set of optional extensions for network, node, termination point and link";
+    leaf name {
+      type string;
+      description
+        "The user friendly name, if required.
+        It is optional, for backward compatibility";
+    }
+    leaf-list label {
+      type string;
+      description
+        "Used for optionally adding any labels to the instances, if required";
+    }
+    anydata extension {
+      config false;
+      description
+        "The extension point for any other meta info or data";
+    }
+  }
+
+  /*
+   * Adding common SIMAP leafs to all RFC8345 entities.
+   */
+
+  augment "/nw:networks/nw:network" {
+    description
+      "Adding optional common simap extensions and addressing requirements:
+      REQ-LIVE, REQ-SNAPSHOT, REQ-POTENTIAL";
+
+    uses st:simap-common;
+
+    /*
+      We may need to have different snapshots
+    */
+    leaf live {
+      type boolean
+    }
+  }
+
+  augment "/nw:networks/nw:network/nw:node" {
+    description
+      "Adding optional common simap extensions";
+
+    uses st:simap-common;
+  }
+
+  augment "/nw:networks/nw:network/nw:node/nt:termination-point" {
+    description
+      "Adding optional common simap extensions";
+
+    uses st:simap-common;
+  }
+
+  augment "/nw:networks/nw:network/nt:link" {
+    description
+      "Adding optional common simap extensions";
+
+    uses st:simap-common;
+  }
+
+  /*
+   * Adding bidirectional and multi-point capabilities to the link
+   */
+
+  augment "/nw:networks/nw:network/nt:link" {
+    description
+      "Models the link that can be unidirectional, bidirectional, point-to-point,
+      point-to-multi-point, multipoint-to-multipoint, therefore addressing gaps:
+      - RFC8345-GAP-BIDIR
+      - RFC8345-GAP-MULTI-POINT
+
+      with augmenting we keep source and destination for backward compatibility (APPROACH-AUGMENT, APPROACH-BIS),
+      if different approach (APPROACH-NEW) is selected source and destination are not needed any more.
+
+      Allows for the link to terminate on the termination point that is on another network, therefore
+      addressing the gap:
+      - RFC8345-GAP-MULTI-DOMAIN
+      ";
+
+    leaf link-type {
+      type identityref {
+        base st:link-type;
+      }
+      description
+        "The reference to the specification for the internal structure of the link.
+         It can be point to point (link-type-p2p), point to multipoint (link-type-p2mp) or
+         multipoint to multipoint (link-type-mp2mp).
+         It can also be any other custom identity defined with base link-type.
+         It is optional, so the model supports the solution without the link type information,
+         either if not known or for backward compatible case.";
+    }
+
+    leaf link-direction {
+      type identityref {
+        base st:link-direction;
+      }
+      description
+        "The direction of the link: unidirectional (link-direction-uni) or bidirectional (link-direction-bi).
+         It can also be any other custom identity defined with base link-direction.
+         It is optional, so the model supports the solution without the link direction information,
+         either if not known or for backward compatible case.";
+    }
+
+    list tp {
+      key "network-ref node-ref tp-ref";
+      description "List of termination points in the link";
+      uses nt:tp-ref;
+
+      leaf tp-role {
+        type identityref {
+          base st:tp-role;
+        }
+        description
+          "The role of the termination point in the link defined in the
+           link-type spec.";
+        }
+      leaf tp-direction {
+        type identityref {
+          base st:tp-direction;
+        }
+        description
+          "The direction of the point in the link";
+      }
+    }
+  }
+}
