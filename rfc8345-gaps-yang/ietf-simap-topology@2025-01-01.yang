@@ -34,10 +34,12 @@ module ietf-simap-topology {
 
   description
     "This module defines the SIMAP core topology model based on the
-     requirements defined in https://datatracker.ietf.org/doc/draft-ietf-nmop-simap-concept/.
-     We identified the gaps between the RFC8345 and the requirements and they are implemented
-     temporarily in this module. There are multiple options how these gaps can be modelled, this module here
-     is just a starting point for discussion which is the best way to proceed:
+     requirements defined in
+     https://datatracker.ietf.org/doc/draft-ietf-nmop-simap-concept/.
+     We identified the gaps between the RFC8345 and the requirements and
+     they are implemented temporarily in this module. There are multiple
+     options how these gaps can be modelled, this module is just
+     a starting point for discussion about the best way to proceed:
          APPROACH-AUGMENT: via new simap module that augments rfc8345 modules (ietf-network and ietf-network-topology)
          APPROACH-BIS: via RFC8345 bis module - fully backward compatible with RFC8345 for ietf-network and
                    ietf-network-topology modules
@@ -111,6 +113,7 @@ module ietf-simap-topology {
       "XXX: A YANG Data Model for SIMAP Core Topologies";
   }
 
+
   /*
    * Identities related to link directionality and cardinality of points
    */
@@ -176,7 +179,37 @@ module ietf-simap-topology {
   }
 
   /*
+   * Identities related to identification if the topology is live/snapshot/potential
+   */
+
+  identity snapshot-info {
+    description "Base identity for what topology is requested/retrieved";
+  }
+
+  identity live {
+    base "st:snapshot-info";
+    description "Network live topology";
+  }
+
+  identity historical {
+    base "st:snapshot-info";
+    description "Network historical snapshot topology";
+  }
+
+  identity potential {
+    base "st:snapshot-potential";
+    description "Potential new network topology";
+  }
+
+  identity tp-direction-symmetric {
+    base "st:tp-direction";
+    description "TP in the bidirectional link";
+  }
+
+  /*
    * Common SIMAP groupings for optional RFC8345 extensions
+   * Addressing requirements REQ-PROPERTIES as name, label and description may be important properties that
+   * clarify the topological roles in
    */
   grouping simap-common {
     description "A reusable set of optional extensions for network, node, termination point and link";
@@ -191,30 +224,27 @@ module ietf-simap-topology {
       description
         "Used for optionally adding any labels to the instances, if required";
     }
+    leaf description {
+      type string;
+      description
+        "Used for optionally adding any description to the instances, if required";
+    }
     anydata extension {
       config false;
       description
-        "The extension point for any other meta info or data";
+        "The extension point for any other meta info or data or any unknown extensions.
+        Proposed solution for SIMAP requirement REQ-EXTENSIBLE. Any additional info that is topologically significant
+        can also be added this way for requirement REQ-TOPO-ONLY or REQ-PROPERTIES.
     }
   }
 
-  /*
-   * Adding common SIMAP leafs to all RFC8345 entities.
-   */
 
   augment "/nw:networks/nw:network" {
+
     description
-      "Adding optional common simap extensions and addressing requirements:
-      REQ-LIVE, REQ-SNAPSHOT, REQ-POTENTIAL";
+      "Adding optional common simap extensions";
 
     uses st:simap-common;
-
-    /*
-      We may need to have different snapshots
-    */
-    leaf live {
-      type boolean
-    }
   }
 
   augment "/nw:networks/nw:network/nw:node" {
@@ -237,6 +267,7 @@ module ietf-simap-topology {
 
     uses st:simap-common;
   }
+
 
   /*
    * Adding bidirectional and multi-point capabilities to the link
@@ -303,4 +334,28 @@ module ietf-simap-topology {
       }
     }
   }
+
+  augment "/nw:networks/nw:network" {
+    description
+      "Adding optional common simap extensions and addressing requirements:
+      REQ-LIVE, REQ-SNAPSHOT, REQ-POTENTIAL";
+
+    leaf snapshot-info {
+      type identityref {
+        base st:snapshot-info;
+      }
+      description
+        "The information if the topology is live, historical or potential.
+         If historical, we need additional attribute for the timestamp";
+    }
+    choice snapshot-info {
+      case historical {
+        leaf snapshot-timestamp {
+            type yang:date-and-time;
+        }
+      }
+    }
+  }
+
+
 }
