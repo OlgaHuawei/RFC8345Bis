@@ -79,16 +79,18 @@ This document will focus on modelling the RFC8345 gaps
 
 ## Generic requirements
 
-The following requirements are generic interface requiremenst and do not impact SIMAP modelling:
+The following requirements are generic interface requirements and do not impact SIMAP modelling:
 
 * Architectural Requirements:
 
-    * REQ-CONDITIONAL: Provide capability for conditional retrieval of parts of SIMAP.
+    * REQ-CONDITIONAL: Provide capability for conditional retrieval of parts of SIMAP. The NETCONF/RESTCONF and YANG
+support conditional retrieval. In the case that more advanced queries are needed, alternative query interface may be
+required.
     * REQ-SCALES: The SIMAP API must be scalable.
     * REQ-PERFORMANCE: The SIMAP API must be  performant.
     * REQ-SECURITY:	The conventional NACM control access rules {{!RFC8341}} should apply
 
-## Requiremenst supported by RFC8345
+## Requirements supported by RFC8345
 
 Based on our initial analysis, the following SIMAP requirements are already supported by RFC8345 and do not require any 
 modelling extensions/modifications to ietf-network and ietf-network-topology:
@@ -105,14 +107,19 @@ overlay topology
     * REQ-CONTROL-PLANE: Underlay control plane routing state needs to be correlatable to underlay L3 topology. 
 Overlay control-plane routing state needs to be correlate-able to overlay L3 network topology.
 
+* Design Requirements:
+    * REQ-TOPO-ONLY: SIMAP should contain only topological information.
+
 * Architectural Requirements:
     * REQ-DISCOVERY: A network controller must perform the initial and on-demand discovery of a network 
     * REQ-SYNCH: The controller must perform the sync with the network.
     * REQ-USABILITY: The SIMAP API must be simple and easy to integrate with the client applications. This requirement 
 is supported for the unidirectional and point2point networks.
 	
-* Design Requirements:
-    * REQ-TOPO-ONLY: SIMAP should contain only topological information.
+
+
+We must keep these requirements in mind when proposing implementation solutions for gaps, as they are 
+applicable to how we model the extensions / changes.
 
 ## Requirements not supported by RFC8345 (Gaps)
 
@@ -120,40 +127,51 @@ Based on the initial analysis, the following SIMAP requirements are not fully su
 extensions or modifications:
 
 * Operator Requirements:
-    * REQ-BIDIR: SIMAP must provide a mechanism to model bidirectional links
-    * REQ-MULTI-POINT: SIMAP must provide a mechanism to model multipoint links
-    * REQ-MULTI-DOMAIN: SIMAP must provide a mechanism to model links between networks
-    * REQ-SUBNETWORK: SIMAP must provide a mechanism to model network decomposition into sub-networks
-
-    * REQ-PROG-OPEN-MODEL: Open and programmable SIMAP.
-    * REQ-STD-API-BASED: Standard based SIMAP models and APIs, for multi-vendor support.
-    * REQ-GRAPH-TRAVERSAL: Topology graph traversal
+    * REQ-PROG-OPEN-MODEL: Open and programmable SIMAP.Gap: what-if and snapshots part.
+    * REQ-STD-API-BASED: Standard based SIMAP models and APIs, for multi-vendor support. Gap: links are entities, adding linkedTo relations would help
     * REQ-SNAPSHOT: Network snapshot topology.
     * REQ-POTENTIAL: Potential new network topology.
-    * REQ-SEMANTIC: Network topology semantics
+    * REQ-SEMANTIC: Network topology semantics. Gap: some semantic missing.
     * REQ-EXTENSIBLE: Extensible via metadata
     * REQ-PLUG: SIMAP must be pluggable
-    * REQ-SHARED: Share nodes, links, and termination points between different networks.
+    * REQ-BIDIR: SIMAP must provide a mechanism to model bidirectional links. Gap: complex
+    * REQ-MULTI-POINT: SIMAP must provide a mechanism to model multipoint links. Gap: complex
+    * REQ-MULTI-DOMAIN: SIMAP must provide a mechanism to model links between networks
+    * REQ-SUBNETWORK: SIMAP must provide a mechanism to model network decomposition into sub-networks
     * REQ-SUPPORTING: SIMAP must provide a mechanism to model supporting relationships between different types of 
-topological entities (e.g., a termination point is supported by the node)
-    * REQ-STATUS: Links and nodes that are down must appear in the topology. 
+topological entities (e.g., a termination point is supported by the node). Gap: between different types
+    * REQ-STATUS: Links and nodes that are down must appear in the topology. Gap: optionally if status is in SIMAP, we need to model it
 
 * Design Requirements:
+    * REQ-TOPO-ONLY: SIMAP should contain only topological information. 
     * REQ-PROPERTIES: SIMAP entities should mainly contain properties used to identify topological entities at different 
-layers, identify their roles, and topological relationships between them."
+layers, identify their roles, and topological relationships between them.
     * REQ-RELATIONSHIPS: SIMAP should contain all topological relationships inside each layer or between the layers 
 (underlay/overlay)
-    * REQ-TEMPO-HISTO: Must support geo-spatial, temporal, and historical data.  
+    * REQ-TEMPO-HISTO: Must support geo-spatial, temporal, and historical data.
 
-* Architectural Requirements:
-    * REQ-USABILITY: The SIMAP API must be simple and easy to integrate with the client applications.
-This requirement means that any extensions/modifications must keep the original RFC8345 approach as simple as possible
-and fully generic and technology and layer agnostic.
 
 ## Requirements to keep in mind when modelling gaps
 
-The following requirements are already supported in RFC8345, but we must keep them in mind when proposing
-implementation solutions for gaps.
+Qny extensions/modifications must keep the original RFC8345 approach as simple as possible
+and fully generic and technology and layer agnostic. The following requirements are already supported in RFC8345, 
+but we must keep them in mind when proposing implementation solutions for gaps, as they are applicable to how we 
+model the extensions / changes:
+
+* Operator Requirements: 
+    * REQ-BASIC-MODEL-SUPPORT: Basic model with network, node, link, and termination point entity types.
+    * REQ-LAYERED-MODEL: Topology layers from physical layer up to service layer.
+    * REQ-COMMON-API: Common SIMAP models and APIs, for multi domain.
+    * REQ-LIVE: Live network topology.
+    * REQ-LAYER-NAVIGATE: Navigation inside the topology layer and between the topology layers
+
+* Design Requirements:
+    * REQ-TOPO-ONLY: SIMAP should contain only topological information.
+
+* Architectural Requirements:
+    * REQ-USABILITY: The SIMAP API must be simple and easy to integrate with the client applications. This requirement 
+is supported for the unidirectional and point2point networks.
+	
 
 ## Requirements for further analysis
 
@@ -162,7 +180,12 @@ The following requirements need to be analyzed further to determine if they can 
 * Operator Requirements:
     * REQ-VIEWPOINTS: Different viewpoints provide capability to have different views to different stakeholders.
     * REQ-TOPOLOGY-ABSTRACTION: Navigation across the abstraction levels inside a single network layer
+    * REQ-SHARED: Share nodes, links, and termination points between different networks.
 
+The following requirements have to be analyzed further to capture all generic networking semantics missing from
+RFC8345 and from additional requirements defined as gaps.
+* Operator Requirements:
+    * REQ-SEMANTIC: Network topology semantics. 
 
 # Modelling options for RFC8345 Gaps 
 
@@ -203,7 +226,309 @@ APPROACH-AUGMENT and subset of requirements implemented as APPROACH-NEW (e.g lin
 
 # Solution Proposal for the RFC8345 Gaps
 
+## REQ-PROG-OPEN-MODEL: Open and Programmable
+
+### Analysis
+RFC8345 already supports the open and programmable API, but this requirements also mentions the what-if scenarios
+and different snapshots that may have some modelling implications 
+(e.g. the need to switch between different snapshots, relation to the real network that the snapshot is for, etc).
+
+### Implementation Proposal
+
+## REQ-STD-API-BASED: Standard based
+
+### Analysis
+RFC8345 already supports the standard model and API for the SIMAP requirements supported by RFC8345. 
+We also need a standard model for the SIMAP requirements identified as RFC8345 gaps.
+This requirement also mentions that these APIs must also provide the capability to retrieve the 
+links to external data/models.
+
+### Implementation Proposal
+The solution for the external links is proposed in a separate draft {{!I-D.vivek-simap-external-relationship}}.
+
+## REQ-GRAPH-TRAVERSAL: Graph Traversal
+
+### Analysis
+RFC8345 states that one of the reasons for modelling only unidirectional and point to point links 
+is to allows the model to be very easily subjected to applications that make use of graph algorithms.
+
+If we add support for bidirectional and multipoint links, this will make the graph traversal more difficult
+according to RFC8345. But based on the discussions with some Operators, having links as nodes and 
+not direct relations is not graph traversal friendly in any case and having the capability to have the direct link 
+relations between the termination points or nodes is needed.
+
+### Implementation Proposal
+
+Add read only linked-termination-point and linked-node for optimizing path graph traversal at single layer.
+
+  augment "/nw:networks/nw:network/nw:node/nt:termination-point" {
+    description
+      "Adding optional read only link relations";
+
+    list linked-termination-point {
+      config false;
+      key "network-ref node-ref tp-ref";
+      description
+            "This list identifies any linked termination points, added
+             optionally for read only for optimized path graph traversal";
+
+      uses nt:tp-ref;
+  }
+
+  augment "/nw:networks/nw:network/nw:node" {
+    description
+      "Adding optional read only link relations";
+
+    list linked-node {
+      config false;
+      key "network-ref node-ref";
+      description
+            "This list identifies any linked termination points, added
+             optionally for read only for optimized path graph traversal";
+
+      uses nw:node-ref;
+  }
+
+## REQ-SNAPSHOT: Different snapshots
+
+### Analysis
+SIMAP must enable retrieval of multi-layered topology of different historical snapshots, where a 
+snapshot is the view of the network at any given point in time.
+This requires the implementation proposal to take into account the following:
+
+* how to retrieve historical snapshot for the network using time stamp (recorder time and/or validity time)
+* how to retrieve historical snapshots for the current topology
+* how to model and retrieve historical topology: either full topology or only changes from another snapshot
+* how to retrieve the external models via links in the historical context 
+* is this SIMAP requirement or generic requirement for any YANG retrieval via NETCONF/RESTCONF. The {{!RFC8342}} 
+defines different datastores: configuration datastores (startup, candidate, running, intended) 
+and operational datastore. It does not support the historical datastores. 
+
+### Implementation Proposal
+The following are the identified implementation candidates:
+* this is generic requirement, not just for SIMAP, therefore implementation should not be implemented by SIMAP but 
+by the NETCONF/RESTCONF for historical system state + conf
+
+* implemented via some historical files retrieval of the historical files for specified snapshot-id, 
+network-id and timestamp, and the file itself can have the same structure as a member of 
+the list network:
+
+{: #REQ-SNAPSHOT-YANG-1}
+~~~~
+  container networks-history {
+    config false;
+    list network-history {
+      key "live-network-ref timestamp";
+      description
+        "Historical network. Snapshot is generated for each historical instance, network-ref
+        is the reference for the live network";
+      leaf live-network-ref {
+         type leafref {
+           path "/nw:networks/nw:network/nw:network-id";
+         require-instance false;
+      }
+      leaf timestamp {
+        type yang:date-and-time;
+      }
+      leaf file-id {
+        type inet:uri;
+      }
+    }
+  }
+
+~~~~
+{: #REQ-SNAPSHOT-YANG-1 title="The proposal 1 for historical snapshots"}
+
+* implemented as a separate container in the ietf-network, for read only. Instead of referencing the file,
+the whole yang structure for the network from the list-network is duplicates, except that all supporting
+references must also point to snapshot id as well
+
+{: #REQ-SNAPSHOT-YANG-2}
+~~~~
+container networks-history {
+  config false;
+  list network-history-snapshot {
+    key "network-ref snapshot-id"
+    uses nt:network-ref;
+    leaf snapshot-id {
+      type inet:uri;
+    }
+    leaf timestamp {
+      type yang:date-and-time;
+    }
+    container network-types {
+    }
+    list supporting-network {
+        key "network-ref snapshot-id"
+        leaf network-ref {}
+        leaf snapshot-id {}
+    }
+    list node {
+        leaf node-id {..}
+        list supporting-node {
+          key "network-ref snapshot-id node-ref";
+          ...
+        }
+        list termination-point {
+          leaf tp-id {}
+          list supporting-termination-point {
+            key "network-ref snapshot-id node-ref tp-ref";
+            ...
+          }
+        }
+    }
+    list link {
+        leaf link-id {..}
+        list supporting-link {
+          key "network-ref snapshot-id link-ref";
+          ...
+        }
+    }
+}
+~~~~
+{: #REQ-SNAPSHOT-YANG-2 title="The proposal 2 for historical snapshots"}
+
+The option with file reference is currently proposed in the YANG module.
+
+## REQ-POTENTIAL: Potential new network topology
+
+### Analysis
+SIMAP must enable both retrieval and write access to the potential new network.
+A potential new network is the view at a given point with modifications from the snapshot.
+This view may contain either the full topology or just differences from the snapshot.
+
+This requires the implementation proposal to take into account the following:
+* SIMAP write is used for either what-if or intended scenarios, but we have to ensure that we can create multiple 
+snapshots
+* how to retrieve different what-if network instances
+* how to connect what-if snapshot with the historical snapshot, as the current topology may change and
+what-if snapshot was created based on the historical context
+* how to connect to the current network instance
+* how to model and retrieve potential network: either full topology or only changes from the snapshot
+* how to retrieve the external models via links in the what-if context 
+* is this SIMAP requirement or generic requirement for any YANG retrieval via NETCONF/RESTCONF.
+The {{!RFC8342}} defines different datastores: configuration datastores (startup, candidate, running, intended) 
+and operational datastore. It can potentially be used for one candidate, but it does not support multiple candidates
+with links to different running.
+
+### Implementation Proposal
+The following is the initial proposal:
+* use list network for potential as well 
+* network-id is generated for each potential candidate
+* additional info needed: type: potential, timestamp, relation to the live network network-id
+* relation to historical snapshot may be determined based on the live network-id and timestamp
+
+{: #REQ-POTENTIAL-YANG-1}
+~~~~
+
+  identity network-category {
+    description "Base identity for the network category";
+  }
+
+  identity network-category-potential {
+    base "st:network-category";
+    description "Potential topology. There may be optionally one or multiple instances of the potential network,
+                 related to the current network. Timestamp determines what historical snapshot has been used when
+                 creating the potential network instance";
+  }
+
+  augment "/nw:networks/nw:network" {
+
+    description
+      "Adding optional capability for modelling of potential and intended network";
+
+    leaf network-category {
+      type identityref {
+        base st:network-category;
+      }
+      description
+        "The network category: live, potential, intended. Default is live.";
+    }
+    leaf live-network-ref {
+      description
+        "Required for potential and intended only to connect to the live network instance";
+       type leafref {
+         path "/nw:networks/nw:network/nw:network-id";
+       require-instance false;
+    }
+    leaf timestamp {
+      description
+        "Required for potential only to connect to the historical snapshot
+      type yang:date-and-time;
+    }
+  }
+
+~~~~
+{: #REQ-POTENTIAL-YANG title="The proposal for potential snapshots"}
+
+This proposal has an issue with backward compatibility as the read would return potential 
+instances as well. Alternative is to have a separate list networks-potential.
+
+## REQ-INTENDED: Intended topology
+
+### Analysis
+SIMAP must enable both retrieval and write access to the intended network topology that cannot be
+discovered from the real network (for example target L2 Topology, L3 Topology, passive topology that
+cannot be discovered, etc).
+
+This requires the implementation proposal to take into account the following:
+* how to connect intended to the current network instance
+
+### Implementation Proposal
+The following is the initial proposal:
+* use list network for potential as well 
+* network-id is generated for each potential candidate
+* additional info needed: type: intended, timestamp, relation to the live network network-id
+* relation to historical snapshot may be determined based on the live network-id and timestamp
+
+{: #REQ-INTENDED-YANG-1}
+~~~~
+
+  identity network-category {
+    description "Base identity for the network category";
+  }
+
+  identity network-category-intended {
+    base "st:network-category";
+    description "Intended topology, there is optionally 1 instance of intended network related to the live network
+                 instance";
+  }
+
+  augment "/nw:networks/nw:network" {
+
+    description
+      "Adding optional capability for modelling of potential and intended network";
+
+    leaf network-category {
+      type identityref {
+        base st:network-category;
+      }
+      description
+        "The network category: live, potential, intended. Default is live.";
+    }
+    leaf live-network-ref {
+      description
+        "Required for potential and intended only to connect to the live network instance";
+       type leafref {
+         path "/nw:networks/nw:network/nw:network-id";
+       require-instance false;
+    }
+    leaf timestamp {
+      description
+        "Required for potential only to connect to the historical snapshot
+      type yang:date-and-time;
+    }
+  }
+
+~~~~
+{: #REQ-INTENDED-YANG title="The proposal for intended snapshots"}
+
+This proposal has an issue with backward compatibility as the read would return intended 
+instances as well. Alternative is to have a separate list networks-intended.
+
 ## REQ-BIDIR: Bidirectional Links
+
+### Analysis
 
 Move any relevant text from 2 drafts (draft-davis-nmop-some-refinements-to-rfc8345
 and draft-havel-nmop-digital-map) about the current RFC8345 solution for bidir and 
@@ -211,7 +536,8 @@ why this is not the right solution.
 
 ### Implementation Proposal
 
-Add 
+{: #REQ-BIDIR-YANG}
+~~~~
   identity link-direction {
     description "Base identity for the directionality of the link";
   }
@@ -225,6 +551,57 @@ Add
     base "st:link-direction";
     description "Bidirectional link";
   }
+
+  identity tp-direction {
+    description "Base identity for the directionality of the tp";
+  }
+
+  identity tp-direction-symmetric {
+    base "st:tp-direction";
+    description "TP in the bidirectional link";
+  }
+
+  identity tp-direction-source {
+    base "st:tp-direction";
+    description "TP is the source tp in the link";
+  }
+
+  identity tp-direction-destination {
+    base "st:tp-direction";
+    description "TP is the destination tp in the link";
+  }
+
+  augment "/nw:networks/nw:network/nt:link" {
+
+    :
+    :
+    leaf link-direction {
+      type identityref {
+        base st:link-direction;
+      }
+      description
+        "The direction of the link: unidirectional (link-direction-uni) or bidirectional (link-direction-bi).
+         It can also be any other custom identity defined with base link-direction.
+         It is optional, so the model supports the solution without the link direction information,
+         either if not known or for backward compatible case.";
+    }
+    list tp {
+      key "network-ref node-ref tp-ref";
+      description "List of termination points in the link";
+      uses nt:tp-ref;
+        :
+        :
+      leaf tp-direction {
+        type identityref {
+          base st:tp-direction;
+        }
+        description
+          "The direction of the point in the link";
+      }
+  }
+
+~~~~
+{: #REQ-BIDIR-YANG title="The proposal for bidirectional links"}
 
 ## REQ-MULTI-POINT: Multipoint Links
 
@@ -248,28 +625,10 @@ solution for multidomain and why this is not the right solution.
 
 Propose the implementation and approach.
 
-## REQ-PROG-OPEN-MODEL: Open and programmable API
-RFC8345 already supports the open and programmable API, but this requirements also mentions the what-if scenarios
-and different snapshots that may have some modelling implications 
-(e.g. the need to switch between different snapshots, relation to the real network that the snapshot is for, etc).
 
-## REQ-STD-API-BASED: Standard based SIMAP models and APIs, for multi-vendor support
-RFC8345 already supports the standard model and API for the SIMAP requirements supported by RFC8345. 
-We also need a standard model for the SIMAP requirements identified as RFC8345 gaps.
-This requirement also mentions that these APIs must also provide the capability to retrieve the 
-links to external data/models.
 
-## REQ-GRAPH-TRAVERSAL: Topology graph traversal
-RFC8345 states that one of the reasons for modelling only unidirectional and point to point links 
-is to allows the model to be very easily subjected to applications that make use of graph algorithms.
 
-If we add support for bidirectional and multipoint links, this will make the graph traversal more difficult
-according to RFC8345. But based on the discussions with some Operators, having links as nodes and 
-not direct relations is not graph traversal friendly and having the capability to have the direct link relations 
-between the termination points or nodes is needed.
 
-Therefore, we propose to add read only linkedTo unidirectional relations for optimizing path graph traversal 
-at single layer.
 
 # Model Structure Details
 

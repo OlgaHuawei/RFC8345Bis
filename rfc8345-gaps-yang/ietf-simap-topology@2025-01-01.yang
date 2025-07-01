@@ -114,6 +114,128 @@ module ietf-simap-topology {
   }
 
 
+
+  identity tp-role {
+    description "Base identity from which all tp roles in the link are derived.";
+  }
+
+  /*
+   * Common SIMAP groupings for optional RFC8345 extensions
+   * Addressing requirements REQ-PROPERTIES as name, label and description may be important properties that
+   * clarify the topological roles in
+   */
+  grouping simap-common {
+    description "A reusable set of optional extensions for network, node, termination point and link";
+    leaf name {
+      type string;
+      description
+        "The user friendly name, if required.
+        It is optional, for backward compatibility";
+    }
+    leaf-list label {
+      type string;
+      description
+        "Used for optionally adding any labels to the instances, if required";
+    }
+    leaf description {
+      type string;
+      description
+        "Used for optionally adding any description to the instances, if required";
+    }
+    anydata extension {
+      config false;
+      description
+        "The extension point for any other meta info or data or any unknown extensions.
+        Proposed solution for SIMAP requirement REQ-EXTENSIBLE. Any additional info that is topologically significant
+        can also be added this way for requirement REQ-TOPO-ONLY or REQ-PROPERTIES.";
+    }
+  }
+
+  augment "/nw:networks/nw:network" {
+    description
+      "Adding optional common simap extensions";
+    uses st:simap-common;
+  }
+
+  augment "/nw:networks/nw:network/nw:node" {
+    description
+      "Adding optional common simap extensions";
+    uses st:simap-common;
+  }
+
+  augment "/nw:networks/nw:network/nw:node/nt:termination-point" {
+    description
+      "Adding optional common simap extensions";
+    uses st:simap-common;
+  }
+
+  augment "/nw:networks/nw:network/nt:link" {
+    description
+      "Adding optional common simap extensions";
+    uses st:simap-common;
+  }
+
+  /*
+   * Candidate for potential (REQ-POTENTIAL) and intended (REQ-INTENDED) topology requirement
+   */
+
+   /*
+   * Identities related to type of the network: live, potential, intended
+   */
+  identity network-category {
+    description "Base identity for the network category";
+  }
+
+  identity network-category-live {
+    base "st:network-category";
+    description "Live topology, there is only 1 instance of the live network. This is the default value for the
+                 current network";
+  }
+
+  identity network-category-potential {
+    base "st:network-category";
+    description "Potential topology. There may be optionally one or multiple instances of the potential network,
+                 related to the current network. Timestamp determines what historical snapshot has been used when
+                 creating the potential network instance";
+  }
+
+  identity network-category-intended {
+    base "st:network-category";
+    description "Intended topology, there is optionally 1 instance of intended network related to the live network
+                 instance";
+  }
+
+  augment "/nw:networks/nw:network" {
+
+    description
+      "Adding optional capability for modelling of potential and intended network";
+
+    leaf network-category {
+      type identityref {
+        base st:network-category;
+      }
+      description
+        "The network category: live, potential, intended. Default is live.";
+    }
+    leaf live-network-ref {
+      description
+        "Required for potential and intended only to connect to the live network instance";
+       type leafref {
+         path "/nw:networks/nw:network/nw:network-id";
+       require-instance false;
+       }
+    }
+    leaf timestamp {
+      description
+        "Required for potential only to find related  historical snapshot";
+      type yang:date-and-time;
+    }
+  }
+
+  /*
+   * Adding bidirectional and multi-point capabilities to the link
+   */
+
   /*
    * Identities related to link directionality and cardinality of points
    */
@@ -174,118 +296,19 @@ module ietf-simap-topology {
     description "TP is the destination tp in the link";
   }
 
-  identity tp-role {
-    description "Base identity from which all tp roles in the link are derived.";
-  }
-
-  /*
-   * Identities related to identification if the topology is live/snapshot/potential
-   */
-
-  identity snapshot-info {
-    description "Base identity for what topology is requested/retrieved";
-  }
-
-  identity live {
-    base "st:snapshot-info";
-    description "Network live topology";
-  }
-
-  identity historical {
-    base "st:snapshot-info";
-    description "Network historical snapshot topology";
-  }
-
-  identity potential {
-    base "st:snapshot-potential";
-    description "Potential new network topology";
-  }
-
-  identity tp-direction-symmetric {
-    base "st:tp-direction";
-    description "TP in the bidirectional link";
-  }
-
-  /*
-   * Common SIMAP groupings for optional RFC8345 extensions
-   * Addressing requirements REQ-PROPERTIES as name, label and description may be important properties that
-   * clarify the topological roles in
-   */
-  grouping simap-common {
-    description "A reusable set of optional extensions for network, node, termination point and link";
-    leaf name {
-      type string;
-      description
-        "The user friendly name, if required.
-        It is optional, for backward compatibility";
-    }
-    leaf-list label {
-      type string;
-      description
-        "Used for optionally adding any labels to the instances, if required";
-    }
-    leaf description {
-      type string;
-      description
-        "Used for optionally adding any description to the instances, if required";
-    }
-    anydata extension {
-      config false;
-      description
-        "The extension point for any other meta info or data or any unknown extensions.
-        Proposed solution for SIMAP requirement REQ-EXTENSIBLE. Any additional info that is topologically significant
-        can also be added this way for requirement REQ-TOPO-ONLY or REQ-PROPERTIES.
-    }
-  }
-
-
-  augment "/nw:networks/nw:network" {
-
-    description
-      "Adding optional common simap extensions";
-
-    uses st:simap-common;
-  }
-
-  augment "/nw:networks/nw:network/nw:node" {
-    description
-      "Adding optional common simap extensions";
-
-    uses st:simap-common;
-  }
-
-  augment "/nw:networks/nw:network/nw:node/nt:termination-point" {
-    description
-      "Adding optional common simap extensions";
-
-    uses st:simap-common;
-  }
-
-  augment "/nw:networks/nw:network/nt:link" {
-    description
-      "Adding optional common simap extensions";
-
-    uses st:simap-common;
-  }
-
-
-  /*
-   * Adding bidirectional and multi-point capabilities to the link
-   */
-
   augment "/nw:networks/nw:network/nt:link" {
     description
       "Models the link that can be unidirectional, bidirectional, point-to-point,
-      point-to-multi-point, multipoint-to-multipoint, therefore addressing gaps:
-      - RFC8345-GAP-BIDIR
-      - RFC8345-GAP-MULTI-POINT
+      point-to-multi-point, multipoint-to-multipoint, therefore addressing requirements:
+      - REQ-BIDIR
+      - REQ-MULTI-POINT
 
       with augmenting we keep source and destination for backward compatibility (APPROACH-AUGMENT, APPROACH-BIS),
       if different approach (APPROACH-NEW) is selected source and destination are not needed any more.
 
       Allows for the link to terminate on the termination point that is on another network, therefore
       addressing the gap:
-      - RFC8345-GAP-MULTI-DOMAIN
+      - REQ-MULTI-DOMAIN
       ";
 
     leaf link-type {
@@ -335,27 +358,26 @@ module ietf-simap-topology {
     }
   }
 
-  augment "/nw:networks/nw:network" {
-    description
-      "Adding optional common simap extensions and addressing requirements:
-      REQ-LIVE, REQ-SNAPSHOT, REQ-POTENTIAL";
-
-    leaf snapshot-info {
-      type identityref {
-        base st:snapshot-info;
-      }
+  container networks-history {
+    config false;
+    list network-history {
+      key "live-network-ref timestamp";
       description
-        "The information if the topology is live, historical or potential.
-         If historical, we need additional attribute for the timestamp";
-    }
-    choice snapshot-info {
-      case historical {
-        leaf snapshot-timestamp {
-            type yang:date-and-time;
-        }
+        "Historical network. Snapshot is generated for each historical instance, network-ref
+        is the reference for the live network";
+      leaf live-network-ref {
+         type leafref {
+           path "/nw:networks/nw:network/nw:network-id";
+           require-instance false;
+         }
+      }
+      leaf timestamp {
+        type yang:date-and-time;
+      }
+      leaf file-id {
+        type inet:uri;
       }
     }
   }
-
-
 }
+
