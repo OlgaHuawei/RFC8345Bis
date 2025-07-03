@@ -786,16 +786,17 @@ The SIMAP data model is defined in the
 {: #ietf-simap-topology-tree}
 ~~~~
 module: ietf-simap-topology
+  +--ro networks-history
+     +--ro network-history* [live-network-ref timestamp]
+        +--ro live-network-ref    -> /nw:networks/network/network-id
+        +--ro timestamp           yang:date-and-time
+        +--ro file-id?            inet:uri
 
   augment /nw:networks/nw:network:
-    +--rw name?                       string
-    +--rw label*                      string
-    +--rw description?                string
-    +--ro extension?                  <anydata>
-    +--rw snapshot-info?              identityref
-    +--rw (snapshot-info)?
-       +--:(historical)
-          +--rw snapshot-timestamp?   yang:date-and-time
+    +--rw name?          string
+    +--rw label*         string
+    +--rw description?   string
+    +--ro extension?     <anydata>
   augment /nw:networks/nw:network/nw:node:
     +--rw name?          string
     +--rw label*         string
@@ -811,20 +812,17 @@ module: ietf-simap-topology
     +--rw label*         string
     +--rw description?   string
     +--ro extension?     <anydata>
+  augment /nw:networks/nw:network:
+    +--rw network-category?   identityref
+    +--rw live-network-ref?   -> /nw:networks/network/network-id
+    +--rw timestamp?          yang:date-and-time
   augment /nw:networks/nw:network/nt:link:
     +--rw link-type?        identityref
     +--rw link-direction?   identityref
     +--rw tp* [network-ref node-ref tp-ref]
-       +--rw tp-ref          -> 
-            /nw:networks/network[nw:network-id=current()/
-            ../network-ref]/
-            node[nw:node-id=current()/../node-ref]/
-            nt:termination-point/tp-id
-       +--rw node-ref        -> 
-            /nw:networks/network[nw:network-id=current()/
-            ../network-ref]/node/node-id
-       +--rw network-ref     -> 
-            /nw:networks/network/network-id
+       +--rw tp-ref          -> /nw:networks/network[nw:network-id=current()/../network-ref]/node[nw:node-id=current()/../node-ref]/nt:termination-point/tp-id
+       +--rw node-ref        -> /nw:networks/network[nw:network-id=current()/../network-ref]/node/node-id
+       +--rw network-ref     -> /nw:networks/network/network-id
        +--rw tp-role?        identityref
        +--rw tp-direction?   identityref
 
