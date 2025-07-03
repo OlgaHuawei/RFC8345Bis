@@ -36,59 +36,6 @@ module ietf-simap-topology {
     "This module defines the SIMAP core topology model based on the
      requirements defined in
      https://datatracker.ietf.org/doc/draft-ietf-nmop-simap-concept/.
-     We identified the gaps between the RFC8345 and the requirements and
-     they are implemented temporarily in this module. There are multiple
-     options how these gaps can be modelled, this module is just
-     a starting point for discussion about the best way to proceed:
-         APPROACH-AUGMENT: via new simap module that augments rfc8345 modules (ietf-network and ietf-network-topology)
-         APPROACH-BIS: via RFC8345 bis module - fully backward compatible with RFC8345 for ietf-network and
-                   ietf-network-topology modules
-         APPROACH-NEW: via new simap module that does not augment rfc8345 modules
-         APPROACH-NEW-TREE: use similar approach to RFC8345 modules, but dont keep backward compatibility  and
-                           optimize the module
-         APPROACH-NEW-GRAPH: use different approach (e.g. not a tree but graph approach)
-
-    The following are identified gaps in https://datatracker.ietf.org/doc/draft-havel-nmop-digital-map/02/:
-    RFC8345-GAP-BIDIR: must support bidirectional links
-       - RFC8345 supports only unidirectional links, it was done intentionally to keep the model as simple as possible
-       - RFC8345 suggests to model bidirectional links via multiple instances of unidirectional links
-       - while keeping the model simpler in RFC8345, the APIs and data become more complex. There is increase of number
-         of instances / data transferred over API, stored in the DB, or managed/monitored
-       - while keeping the model simpler in RFC8345, we lack the semantics for the bidirectional links
-
-    RFC8345-GAP-MULTI-POINT: must support multi-point connectivity
-       - RFC8345 defines all links as point to point and unidirectional,
-         it does not support multi-point links (hub and spoke, full mesh,
-         complex).  It was done intentionally to keep the model as simple as
-         possible.
-       - RFC8345 suggests to model the multi-point networks via pseudo nodes.
-       - while keeping the model simpler in RFC8345, the APIs and data become more complex. There is increase of number
-         of instances / data transferred over API, stored in the DB, or managed/monitored.
-       - while keeping the model simpler in RFC8345, we lack the semantics for multi-point links
-
-    RFC8345-GAP-MULTI-DOMAIN:  must support links between different networks
-       - RFC8345 defines all links as belonging to one network instance and having the source and destination as
-         node and termination point only, not allowing to link to termination point of another network.
-       - This does not allow for links between networks in the case of multi-domains or partitioning.
-       - The only way would be to model each domain as node and have links between them
-
-    RFC8345-GAP-SUBNETWORK: must support network decomposition into sub-networks
-
-    RFC8345-GAP-MULTI-NETWORK: must support nodes, links and tps belonging to different networks
-
-    RFC8345-GAP-SUPPORTING: must support 'supporting' relation between different types of entities
-
-    RFC8345-GAP-SEMANTIC: must support the semantics for the common topologies and connectivity
-
-    The following are the requirements that we will address in this module, some are based on the identified gaps
-    during PoCs/Hackathons, some are coming directly from the operators, see
-    https://datatracker.ietf.org/doc/draft-ietf-nmop-simap-concept/:
-    - REQ-BIDIR for the RFC8345-GAP-BIDIR
-    - REQ-MULTI-POINT for the RFC8345-GAP-MULTI-POINT
-    - REQ-MULTI-DOMAIN for the RFC8345-GAP-MULTI-DOMAIN
-    - REQ-SUBNETWORK for the
-
-
 
      Copyright (c) 2025 IETF Trust and the persons identified as
      authors of the code.  All rights reserved.
@@ -186,17 +133,20 @@ module ietf-simap-topology {
     description "Base identity for the network category";
   }
 
+  identity network-category-none {
+    description "This is used when endpoint selection identifies if live, potential or intended. This is the
+                 default";
+  }
+
   identity network-category-live {
     base "st:network-category";
-    description "Live topology, there is only 1 instance of the live network. This is the default value for the
-                 current network";
+    description "Live topology, there is only 1 instance of the live network";
   }
 
   identity network-category-potential {
     base "st:network-category";
     description "Potential topology. There may be optionally one or multiple instances of the potential network,
-                 related to the current network. Timestamp determines what historical snapshot has been used when
-                 creating the potential network instance";
+                 related to the current network";
   }
 
   identity network-category-intended {
