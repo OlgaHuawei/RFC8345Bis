@@ -27,6 +27,20 @@ author:
     org: Ciena
     email: ndavis@ciena.com
 
+  -
+    fullname: Benoit Claise
+    org: Huawei
+    email: benoit.claise@huawei.com
+
+  -
+    fullname: Oscar Gonzalez de Dios
+    org: Telefonica
+    email: oscar.gonzalezdedios@telefonica.com
+
+  -
+    fullname: Thomas Graf
+    org: Swisscom
+    email: thomas.graf@swisscom.com
 
 contributor:
 
@@ -41,7 +55,7 @@ This document defines a YANG data model for Service & Infrastructure Maps (SIMAP
 YANG modules to support all SIMAP requirements.
 This document will only focus on modelling proposal for each of the requirements not supported by RFC8345. 
 Any related terminology, concepts, use cases and requirements are defined outside of this draft and this draft will 
-only refer to them and propose the implementation solutions.
+only refer to them, analyze how to model and propose the implementation solutions.
 
 --- middle
 
@@ -56,15 +70,16 @@ This model is applicable to multiple domains (access, core, data center, etc.) a
 technologies (Optical, IP, etc.).
 
 {{!I-D.ietf-nmop-simap-concept}} defines the requirements for SIMAP, based on the Operator use cases. 
-Some of the non-functional requirements should be supported by the NETCONF {{!RFC6241}} or RESTCONF {{!RFC8040}} 
-protocols, by Network Configuration Access Control Model {{!RFC8431}} and other current drafts in NETCONF WG.
+Some of the non-functional requirements should be supported by the protocols (NETCONF {{!RFC6241}}, 
+RESTCONF {{!RFC8040}} or other), by Network Configuration Access Control Model {{!RFC8431}} and other current 
+drafts in NETCONF WG.
 Some of the Operators' requirements are already supported by the {{!RFC8345}} ietf-network and 
-ietf-network-topology YANG modules. Some of the Operators' requirements were identified the gaps in these 
-2 modules and this document provides the solution how to implement these gaps.
+ietf-network-topology YANG modules. Some of the Operators' requirements identified the gaps in the ietf-network
+and ietf-network-topology YANG modules. This document peroposes the solution how to implement these gaps.
 
 # Terminology
 
-This document makes use of all terms defined in {{!I-D.ietf-nmop-simap-concept}}.
+This document makes use of the terms defined in {{!I-D.ietf-nmop-simap-concept}}.
 
 # SIMAP Requirements Analysis
 
@@ -128,9 +143,12 @@ extensions or modifications:
 
 * Operator Requirements:
     * REQ-PROG-OPEN-MODEL: Open and programmable SIMAP.Gap: what-if and snapshots part.
-    * REQ-STD-API-BASED: Standard based SIMAP models and APIs, for multi-vendor support. Gap: links are entities, adding linkedTo relations would help
+    * REQ-STD-API-BASED: Standard based SIMAP models and APIs, for multi-vendor support. Gap: links are entities, 
+adding linkedTo relations would help
+    * REQ-GRAPH-TRAVERSAL: Graph Traversal
     * REQ-SNAPSHOT: Network snapshot topology.
     * REQ-POTENTIAL: Potential new network topology.
+    * REQ-INTENDED: Intended topology.
     * REQ-SEMANTIC: Network topology semantics. Gap: some semantic missing.
     * REQ-EXTENSIBLE: Extensible via metadata
     * REQ-PLUG: SIMAP must be pluggable
@@ -143,7 +161,6 @@ topological entities (e.g., a termination point is supported by the node). Gap: 
     * REQ-STATUS: Links and nodes that are down must appear in the topology. Gap: optionally if status is in SIMAP, we need to model it
 
 * Design Requirements:
-    * REQ-TOPO-ONLY: SIMAP should contain only topological information. 
     * REQ-PROPERTIES: SIMAP entities should mainly contain properties used to identify topological entities at different 
 layers, identify their roles, and topological relationships between them.
     * REQ-RELATIONSHIPS: SIMAP should contain all topological relationships inside each layer or between the layers 
@@ -153,7 +170,7 @@ layers, identify their roles, and topological relationships between them.
 
 ## Requirements to keep in mind when modelling gaps
 
-Qny extensions/modifications must keep the original RFC8345 approach as simple as possible
+Any extensions/modifications must keep the original RFC8345 approach as simple as possible
 and fully generic and technology and layer agnostic. The following requirements are already supported in RFC8345, 
 but we must keep them in mind when proposing implementation solutions for gaps, as they are applicable to how we 
 model the extensions / changes:
@@ -186,6 +203,8 @@ RFC8345 and from additional requirements defined as gaps.
 
 * Operator Requirements:
     * REQ-SEMANTIC: Network topology semantics. 
+
+This section will be removed from the future versions of the draft.
 
 # Modelling approach in this draft version
 
@@ -244,19 +263,19 @@ and different snapshots that may have some modelling implications
 
 ### Implementation Proposal
 The implementation for the model changes for this requirement will be covered by the implementation proposal for
-REQ-POTENTIAL.
+REQ-POTENTIAL in Section 6.5.
 
 ## REQ-STD-API-BASED: Standard based
 
 ### Analysis
 RFC8345 already supports the standard model and API for the SIMAP requirements supported by RFC8345. 
-We also need a standard model for the SIMAP requirements identified as RFC8345 gaps.
+We also need a standard model and API for the SIMAP requirements identified as RFC8345 gaps.
 This requirement also mentions that these APIs must also provide the capability to retrieve the 
 links to external data/models.
 
 ### Implementation Proposal
 The implementation for the model changes for this requirement will be covered by the implementation proposal for
-REQ-PLUGG.
+REQ-PLUGG in Section 6.9.
 
 ## REQ-GRAPH-TRAVERSAL: Graph Traversal
 
@@ -269,9 +288,13 @@ according to RFC8345. But based on the discussions with some Operators, having l
 not direct relations is not graph traversal friendly in any case and having the capability to have the direct link 
 relations between the termination points or nodes is needed.
 
+The declarative graph queries will require the graph query language like Cypher or SPARQL. 
+The current IETF modelling and protocols can only provide the limited graph navigation.
+
 ### Implementation Proposal
 
-Add read only linked-termination-point and linked-node for optimizing path graph traversal at single layer.
+Add read only linked-termination-point and linked-node for optimizing path graph traversal at single layer, 
+keep them optional for backward compatibility.
 
 {: #REQ-GRAPH-TRAVERSAL-YANG}
 ~~~~
@@ -342,7 +365,6 @@ the list network, currently proposed in the YANG module:
       leaf live-network-ref {
          type leafref {
            path "/nw:networks/nw:network/nw:network-id";
-         require-instance false;
       }
       leaf timestamp {
         type yang:date-and-time;
@@ -356,9 +378,10 @@ the list network, currently proposed in the YANG module:
 ~~~~
 {: #REQ-SNAPSHOT-YANG-1 title="The proposal 1 for historical snapshots"}
 
-* implemented as a separate container in the ietf-network, for read only. Instead of referencing the file,
-the whole yang structure for the network from the list-network is duplicates, except that all supporting
-references must also point to snapshot id as well. Not recommended for scale reasons.
+* implemented as a separate container, for read only. Instead of referencing the file,
+the whole yang structure for the network from the list-network is duplicated, except that all supporting
+references must also point to snapshot id as well. This implementation is not proposed in the yang file in this
+draft version.
 
 {: #REQ-SNAPSHOT-YANG-2}
 ~~~~
@@ -405,7 +428,7 @@ container networks-history {
 ~~~~
 {: #REQ-SNAPSHOT-YANG-2 title="The proposal 2 for historical snapshots"}
 
-The option with file reference is currently proposed in the YANG module.
+The proposal 1 with file reference is currently implemented in the YANG module.
 
 ## REQ-POTENTIAL: Potential new network topology
 
@@ -441,7 +464,7 @@ The following is the initial proposal:
 * optionally, provide the solution for adding the semantics to the model:
   * use list network for potential as well 
   * network-id is generated for each potential candidate
-  * additional info needed: type: potential, timestamp, relation to the live network network-id
+  * additional info needed: category (potential), timestamp, relation to the live network network-id
   * relation to historical snapshot may be determined based on the live network-id and timestamp
 
 {: #REQ-POTENTIAL-YANG-1}
@@ -473,7 +496,7 @@ The following is the initial proposal:
         base st:network-category;
       }
       description
-        "The network category: live, potential, intended. Default is live.";
+        "The network category: none, live, potential, intended. Default is none.";
     }
     leaf live-network-ref {
       description
@@ -504,6 +527,7 @@ discovered from the real network (for example target L2 Topology, L3 Topology, p
 cannot be discovered, etc).
 
 This requires the implementation proposal to take into account the following:
+
 * how to connect intended to the current network instance
 
 Please refer to Chapter 5: API Scope for analysis of multiple endpoints (sematics determined by the selection
@@ -516,7 +540,7 @@ The following is the initial proposal:
 (please see Chapter 5: API Scope)
 * optionally, provide the solution for adding the semantics to the model:
   * use list network for intended as well 
-  * network-id is generated for intended network, different network-id from the live betwork
+  * network-id is generated for intended network, different network-id from the live network
   * additional info needed: type: intended, relation to the live network network-id
 
 {: #REQ-INTENDED-YANG-1}
@@ -562,7 +586,13 @@ The following is the initial proposal:
 {: #REQ-INTENDED-YANG title="The proposal for intended snapshots"}
 
 Check if this proposal has an issue with backward compatibility,
-as the read would return potential instances as well. Alternative is to have a separate list networks-potential.
+as the read would return potential instances as well. Alternative is to have a separate list networks-intended.
+
+## REQ-SEMANTIC: Network Topology Semantic
+
+### Analysis
+
+### Implementation Proposal
 
 ## REQ-EXTENSIBLE: Extensible via metadata
 
@@ -748,10 +778,50 @@ compute the diff and merge them if needed.
 ## REQ-PROPERTIES: Properties significant for topology
 
 ### Analysis
-Move any relevant text from draft draft-havel-nmop-digital-map.
+This design requirement states that SIMAP entities should contain properties used to identify topological entities at
+different layers, identify their roles, and topological relationships between them. Multiple operator requirements 
+are already covering some specifics, like REQ-BIDIR, REQ-MULTI-POINT and we will analyze and propose implementation
+for any missing semantic as part of REQ-SEMANTIC.
+
+Nevertheless, sometimes the topological information is in the textual form and cannot be done via the model and is
+communicated via name, description, labels. We can also see that many current augmentations of RFC8345 add some common
+properties that are generic and needed at all layers and technologies (e.g. name).
+
+Therefore, we propose to add name, labels and decription into the core model for all SIMAP entities but keep them 
+optional for backward compatibility.
 
 ### Implementation Proposal
-Propose the implementation.
+
+{: #REQ-PROPERTIES-YANG}
+~~~~
+  /*
+   * Common SIMAP groupings for optional RFC8345 extensions
+   * Addressing requirements REQ-PROPERTIES as name, label and description may be important properties that
+   * clarify the topological roles for different layers and technologies
+   */
+  grouping simap-common {
+    description "A reusable set of optional extensions for network, node, termination point and link";
+    leaf name {
+      type string;
+      description
+        "The user friendly name, if required.
+        It is optional, for backward compatibility";
+    }
+    leaf-list label {
+      type string;
+      description
+        "Used for optionally adding any labels to the instances, if required";
+    }
+    leaf description {
+      type string;
+      description
+        "Used for optionally adding any description to the instances, if required";
+    }
+    :
+    :
+  }
+~~~~
+{: #REQ-PROPERTIES-YANG title="The proposal for bidirectional links"}
 
 ## REQ-RELATIONSHIPS: Relationships significant for topology
 
@@ -1168,6 +1238,7 @@ module ietf-simap-topology {
 }
 ~~~~
 {: #fig-ietf-simap-topology-yang title="The YANG Data Model for SIMAP"}
+
 
 # Security Considerations
 

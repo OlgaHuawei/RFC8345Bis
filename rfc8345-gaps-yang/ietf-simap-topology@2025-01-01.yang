@@ -69,7 +69,7 @@ module ietf-simap-topology {
   /*
    * Common SIMAP groupings for optional RFC8345 extensions
    * Addressing requirements REQ-PROPERTIES as name, label and description may be important properties that
-   * clarify the topological roles in
+   * clarify the topological roles for different layers and technologies
    */
   grouping simap-common {
     description "A reusable set of optional extensions for network, node, termination point and link";
@@ -318,7 +318,6 @@ module ietf-simap-topology {
       leaf live-network-ref {
          type leafref {
            path "/nw:networks/nw:network/nw:network-id";
-           require-instance false;
          }
       }
       leaf timestamp {
