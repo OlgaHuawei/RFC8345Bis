@@ -79,9 +79,10 @@ and ietf-network-topology YANG modules. This document peroposes the solution how
 
 # Terminology
 
-This document makes use of the terms defined in {{!I-D.ietf-nmop-simap-concept}}.
-
-# SIMAP Requirements Analysis
+## Why RFC8345 is a Good Approach for SIMAP Modelling
+The main reason for selecting RFC8345 for modelling is its simplicity 
+and that is supports either fully or partially the majority of the core 
+requirements.
 
 The requirements from {{!I-D.ietf-nmop-simap-concept}} were further analyzed and split into 3 categories: 
 
@@ -92,6 +93,7 @@ ietf-network-topology YANG modules.
 
 This document will focus on modelling the RFC8345 gaps and ensuring that the modelling changes do not break
 any requirements already supported by {{!RFC8345}}.
+
 
 ## Generic requirements
 
@@ -307,7 +309,8 @@ keep them optional for backward compatibility.
       key "network-ref node-ref tp-ref";
       description
             "This list identifies any linked termination points, added
-             optionally for read only for optimized path graph traversal";
+             optionally for read only for optimized path graph 
+             traversal";
 
       uses nt:tp-ref;
   }
@@ -321,7 +324,8 @@ keep them optional for backward compatibility.
       key "network-ref node-ref";
       description
             "This list identifies any linked termination points, added
-             optionally for read only for optimized path graph traversal";
+             optionally for read only for optimized path graph 
+             traversal";
 
       uses nw:node-ref;
   }
@@ -360,8 +364,8 @@ the list network, currently proposed in the YANG module:
     list network-history {
       key "live-network-ref timestamp";
       description
-        "Historical network. Snapshot is generated for each historical instance, network-ref
-        is the reference for the live network";
+        "Historical network. Snapshot is generated for each historical 
+         instance, network-ref is the reference for the live network";
       leaf live-network-ref {
          type leafref {
            path "/nw:networks/nw:network/nw:network-id";
@@ -475,39 +479,45 @@ The following is the initial proposal:
   }
 
   identity network-category-none {
-    description "This is used when endpoint selection identifies if live, potential or intended. This is the
-                 default";
+    description "This is used when endpoint selection identifies if 
+                 live, potential or intended. This is the default";
   }
 
   identity network-category-potential {
     base "st:network-category";
-    description "Potential topology. There may be optionally one or multiple instances of the potential network,
-                 related to the current network. Timestamp determines what historical snapshot has been used when
+    description "Potential topology. There may be optionally one or 
+                 multiple instances of the potential network, related 
+                 to the current network. Timestamp determines what 
+                 historical snapshot has been used when
                  creating the potential network instance";
   }
 
   augment "/nw:networks/nw:network" {
 
     description
-      "Adding optional capability for modelling of potential and intended network";
+      "Adding optional capability for modelling of potential 
+       and intended network";
 
     leaf network-category {
       type identityref {
         base st:network-category;
       }
       description
-        "The network category: none, live, potential, intended. Default is none.";
+        "The network category: none, live, potential, intended. 
+         Default is none.";
     }
     leaf live-network-ref {
       description
-        "Required for potential and intended only to connect to the live network instance";
+        "Required for potential and intended only to connect 
+         to the live network instance";
        type leafref {
          path "/nw:networks/nw:network/nw:network-id";
        require-instance false;
     }
     leaf timestamp {
       description
-        "Required for potential only to connect to the historical snapshot
+        "Required for potential only to connect to the 
+         historical snapshot";
       type yang:date-and-time;
     }
   }
@@ -546,40 +556,42 @@ The following is the initial proposal:
 {: #REQ-INTENDED-YANG-1}
 ~~~~
 
-  identity network-category {
-    description "Base identity for the network category";
-  }
-
   identity network-category-none {
-    description "This is used when endpoint selection identifies if live, potential or intended. This is the
-                 default";
+    description "This is used when endpoint selection identifies if 
+                 live, potential or intended. This is the default";
   }
 
   identity network-category-intended {
     base "st:network-category";
-    description "Intended topology, there is optionally 1 instance of intended network related to the live network
-                 instance";
+    description "Intended topology, there is optionally 1 instance of
+                 intended network related to the live network instance";
   }
 
   augment "/nw:networks/nw:network" {
 
     description
-      "Adding optional capability for modelling of potential and intended network";
+      "Adding optional capability for modelling of potential and
+      intended network";
 
     leaf network-category {
       type identityref {
         base st:network-category;
       }
       description
-        "The network category: live, potential, intended. Default is live.";
+        "The network category: live, potential, intended.
+        Default is live.";
     }
     leaf live-network-ref {
       description
-        "Required for potential and intended only to connect to the live network instance";
+        "Required for potential and intended only to connect to the
+        live network instance";
        type leafref {
          path "/nw:networks/nw:network/nw:network-id";
        require-instance false;
+       }
     }
+    :
+    :
   }
 
 ~~~~
@@ -606,12 +618,15 @@ semantics not explicitely implemented in the model.
 Add the following to network, node, termination-point and link, and to supporting relations:
 {: #REQ-EXTENSIBLE-YANG-1}
 ~~~~
- anydata extension {
+    anydata extension {
       config false;
       description
-        "The extension point for any other meta info or data or any unknown extensions.
-        Proposed solution for SIMAP requirement REQ-EXTENSIBLE. Any additional info that is topologically significant
-        can also be added this way for requirement REQ-TOPO-ONLY or REQ-PROPERTIES.";
+        "The extension point for any other meta info or data or any
+        unknown extensions. Proposed solution for SIMAP requirement
+        REQ-EXTENSIBLE. Any additional info that is topologically
+        significant can also be added this way for requirement
+        REQ-TOPO-ONLY or REQ-PROPERTIES.";
+    }
 
 ~~~~
 {: #REQ-EXTENSIBLE-YANG title="The proposal for extensions for meta data"}
@@ -628,9 +643,11 @@ The solution for the external links is proposed in a separate draft {{!I-D.vivek
 
 ### Analysis
 
-Move any relevant text from 2 drafts (draft-davis-nmop-some-refinements-to-rfc8345
-and draft-havel-nmop-digital-map) about the current RFC8345 solution for bidir and 
-why this is not the right solution.
+One of the core characteristics of any network topology is the link directionality.
+While data flows are unidirectional, the bidirectional links are also common in networking. 
+Examples are Ethernet cables, bidirectional SONET rings, socket connection to the server, etc. 
+We also encounter requirements for simplified service layer topology, 
+where we want to model link as bidirectional to be supported by unidirectional links at the lower layer.
 
 * RFC8345 supports only unidirectional links, it was done intentionally to keep the model as simple as possible
 * RFC8345 suggests to model bidirectional links via multiple instances of unidirectional links
@@ -684,11 +701,14 @@ why this is not the right solution.
         base st:link-direction;
       }
       description
-        "The direction of the link: unidirectional (link-direction-uni) or bidirectional (link-direction-bi).
-         It can also be any other custom identity defined with base link-direction.
-         It is optional, so the model supports the solution without the link direction information,
-         either if not known or for backward compatible case.";
+        "The direction of the link: unidirectional (link-direction-uni)
+        or bidirectional (link-direction-bi). It can also be any other
+        custom identity defined with base link-direction. It is
+        optional, so the model supports the solution without the link
+        direction information, either if not known or for backward
+        compatible case.";
     }
+
     list tp {
       key "network-ref node-ref tp-ref";
       description "List of termination points in the link";
@@ -710,9 +730,11 @@ why this is not the right solution.
 ## REQ-MULTI-POINT: Multipoint Links
 
 ### Analysis
-Move any relevant text from 2 drafts (draft-davis-nmop-some-refinements-to-rfc8345
-and draft-havel-nmop-digital-map) about the current RFC8345 solution for multipoint and 
-why this is not the right solution.
+One of the core characteristics of any network topology is its type and link cardinality. 
+Any topology model should be able to model any topology type in a simple and explicit way, 
+including point to multipoint, bus, ring, star, tree, mesh, hybrid and daisy chain. 
+Any topology model should also be able to model any link cardinality in a simple and explicit way, 
+including point to point, point to multipoint, multipoint to multipoint or hybrid.
 
 * RFC8345 defines all links as point to point and unidirectional,
 it does not support multi-point links (hub and spoke, full mesh, complex).  
@@ -723,13 +745,80 @@ It was done intentionally to keep the model as simple as possible.
 * while keeping the model simpler in RFC8345, we lack the semantics for multi-point links
 
 ### Implementation Proposal
-Propose the implementation and approach.
+
+{: #REQ-MULTI-POINT-YANG}
+~~~~
+  identity link-type {
+      description
+        "Base identity for the internal structure of the link";
+  }
+
+  identity link-type-p2p {
+      base "st:link-type";
+      description "Point to point link";
+  }
+
+  identity link-type-p2mp {
+      base "st:link-type";
+      description "Point to multi-point link";
+  }
+
+  identity link-type-mp2mp {
+      base "st:link-type";
+      description "Multi-point to multi-point link";
+  }
+
+  identity link-type-hybrid {
+      base "st:link-type";
+      description "Hybrid links, combination of the other three";
+  }
+
+  augment "/nw:networks/nw:network/nt:link" {
+
+    :
+    :
+    leaf link-type {
+      type identityref {
+        base st:link-type;
+      }
+      description
+        "The reference to the specification for the internal structure
+        of the link. It can be point to point (link-type-p2p), point to
+        multipoint (link-type-p2mp) or multipoint to multipoint
+        (link-type-mp2mp). It can also be any other custom identity
+        defined with base link-type. It is optional, so the model
+        supports the solution without the link type information,
+        either if not known or for backward compatible case.";
+    }
+    list tp {
+      key "network-ref node-ref tp-ref";
+      description "List of termination points in the link";
+      uses nt:tp-ref;
+
+      leaf tp-role {
+        type identityref {
+          base st:tp-role;
+        }
+        description
+          "The role of the termination point in the link defined in the
+           link-type spec.";
+        }
+    :
+    :
+    }
+
+  }
+
+~~~~
+{: #REQ-MULTI-POINT-YANG title="The proposal for multi-point links"}
 
 ## REQ-MULTI-DOMAIN: Multi-domain Links
 
 ### Analysis
-Move any relevant text from draft draft-havel-nmop-digital-map about the current RFC8345 
-solution for multidomain and why this is not the right solution.
+
+Link between multiple networks, sub-networks, or domains is the common 
+concept in network topology. SIMAP must provide a mechanism to model 
+links between networks.
 
 * RFC8345 defines all links as belonging to one network instance and having the source and destination as
 node and termination point only, not allowing to link to termination point of another network.
@@ -737,16 +826,63 @@ node and termination point only, not allowing to link to termination point of an
 * The only way would be to model each domain as node and have links between them
 
 ### Implementation Proposal
-Propose the implementation.
+Allows the link to terminate on the termination point that is
+on another network.
+
+{: #REQ-MULTI-DOMAIN-YANG}
+~~~~
+
+  augment "/nw:networks/nw:network/nt:link" {
+
+    list tp {
+      key "network-ref node-ref tp-ref";
+
+    }
+  }
+~~~~
+{: #REQ-MULTI-DOMAIN-YANG title="The proposal for multi-domain links"}
+
+This way we can model the links in 2 ways:
+- link belongs to one network (e.g. IS-IS Area) but pointing to remote 
+point of another network (e.g. IS-IS Area)
+- link belongs to the parent domain (e.g. IS-IS AS Domain), but points to
+termination points of children domains (e.g. different IS-IS Areas)
 
 ## REQ-SUBNETWORK: Subnetworks and partitioning
 
 ### Analysis
-Move any relevant text from draft draft-havel-nmop-digital-map about the current RFC8345 
-solution for subnetwork and why this is not the right solution.
+RFC8345 does not model networks being part of other networks, 
+therefore cannot model subnetworks and network partitioning. 
+We encountered this problem with modelling IS-IS and OSPF domains and areas. 
+The goal is to model AS/domain with multiple areas so that the 
+SIMAP model contains information about how the AS is first split into 
+different IGP domains and how each IGP domain is split into different 
+areas. 
+This is a common problem for both IS-IS and OSPF.
 
 ### Implementation Proposal
-Propose the implementation.
+
+{: #REQ-SUBNETWORK-YANG}
+~~~~
+
+  augment "/nw:networks/nw:network" {
+    list subnetwork {
+        key "network-ref";
+           description
+             "A subnetwork of the network, supports partitioning";
+           leaf network-ref {
+             type leafref {
+               path "/nw:networks/nw:network/nw:network-id";
+             require-instance false;
+             }
+             description
+               "References the subnetworks";
+           }
+    }
+  }
+
+~~~~
+{: #REQ-SUBNETWORK-YANG title="The proposal for subnetworks}
 
 ## REQ-SUPPORTING: Extension to supporting
 
@@ -796,11 +932,14 @@ optional for backward compatibility.
 ~~~~
   /*
    * Common SIMAP groupings for optional RFC8345 extensions
-   * Addressing requirements REQ-PROPERTIES as name, label and description may be important properties that
+   * Addressing requirements REQ-PROPERTIES as name, label and
+   *  description may be important properties that
    * clarify the topological roles for different layers and technologies
    */
+
   grouping simap-common {
-    description "A reusable set of optional extensions for network, node, termination point and link";
+    description "A reusable set of optional extensions for network,
+                 node, termination point and link";
     leaf name {
       type string;
       description
@@ -810,13 +949,16 @@ optional for backward compatibility.
     leaf-list label {
       type string;
       description
-        "Used for optionally adding any labels to the instances, if required";
+        "Used for optionally adding any labels to the instances,
+         if required";
     }
     leaf description {
       type string;
       description
-        "Used for optionally adding any description to the instances, if required";
+        "Used for optionally adding any description to the instances,
+        if required";
     }
+    anydata extension {
     :
     :
   }
@@ -890,11 +1032,17 @@ module: ietf-simap-topology
     +--rw link-type?        identityref
     +--rw link-direction?   identityref
     +--rw tp* [network-ref node-ref tp-ref]
-       +--rw tp-ref          -> /nw:networks/network[nw:network-id=current()/../network-ref]/node[nw:node-id=current()/../node-ref]/nt:termination-point/tp-id
-       +--rw node-ref        -> /nw:networks/network[nw:network-id=current()/../network-ref]/node/node-id
+       +--rw tp-ref          -> /nw:networks/
+network[nw:network-id=current()/../network-ref]/
+node[nw:node-id=current()/../node-ref]/nt:termination-point/tp-id
+       +--rw node-ref        -> /nw:networks/
+network[nw:network-id=current()/../network-ref]/node/node-id
        +--rw network-ref     -> /nw:networks/network/network-id
        +--rw tp-role?        identityref
        +--rw tp-direction?   identityref
+  augment /nw:networks/nw:network:
+    +--rw subnetwork* [network-ref]
+       +--rw network-ref    -> /nw:networks/network/network-id
 
 ~~~~
 {: #fig-ietf-simap-topology-tree title="The Structure of the SIMAP Data Model"}
@@ -969,16 +1117,19 @@ module ietf-simap-topology {
 
 
   identity tp-role {
-    description "Base identity from which all tp roles in the link are derived.";
+    description "Base identity from which all tp roles in the link are
+                 derived.";
   }
 
   /*
    * Common SIMAP groupings for optional RFC8345 extensions
-   * Addressing requirements REQ-PROPERTIES as name, label and description may be important properties that
-   * clarify the topological roles in
+   * Addressing requirements REQ-PROPERTIES as name, label and
+   *  description may be important properties that
+   * clarify the topological roles for different layers and technologies
    */
   grouping simap-common {
-    description "A reusable set of optional extensions for network, node, termination point and link";
+    description "A reusable set of optional extensions for network,
+                 node, termination point and link";
     leaf name {
       type string;
       description
@@ -988,19 +1139,23 @@ module ietf-simap-topology {
     leaf-list label {
       type string;
       description
-        "Used for optionally adding any labels to the instances, if required";
+        "Used for optionally adding any labels to the instances,
+         if required";
     }
     leaf description {
       type string;
       description
-        "Used for optionally adding any description to the instances, if required";
+        "Used for optionally adding any description to the instances,
+        if required";
     }
     anydata extension {
       config false;
       description
-        "The extension point for any other meta info or data or any unknown extensions.
-        Proposed solution for SIMAP requirement REQ-EXTENSIBLE. Any additional info that is topologically significant
-        can also be added this way for requirement REQ-TOPO-ONLY or REQ-PROPERTIES.";
+        "The extension point for any other meta info or data or any
+        unknown extensions. Proposed solution for SIMAP requirement
+        REQ-EXTENSIBLE. Any additional info that is topologically
+        significant can also be added this way for requirement
+        REQ-TOPO-ONLY or REQ-PROPERTIES.";
     }
   }
 
@@ -1029,53 +1184,60 @@ module ietf-simap-topology {
   }
 
   /*
-   * Candidate for potential (REQ-POTENTIAL) and intended (REQ-INTENDED) topology requirement
+   * Candidate for potential (REQ-POTENTIAL) and intended (REQ-INTENDED)
+   * topology requirement
    */
 
    /*
-   * Identities related to type of the network: live, potential, intended
+   * Identities related to type of the network: 
+   *  live, potential, intended
    */
   identity network-category {
     description "Base identity for the network category";
   }
 
   identity network-category-none {
-    description "This is used when endpoint selection identifies if live, potential or intended. This is the
-                 default";
+    description "This is used when endpoint selection identifies if 
+                 live, potential or intended. This is the default";
   }
 
   identity network-category-live {
     base "st:network-category";
-    description "Live topology, there is only 1 instance of the live network";
+    description "Live topology, there is only 1 instance of the live
+                 network";
   }
 
   identity network-category-potential {
     base "st:network-category";
-    description "Potential topology. There may be optionally one or multiple instances of the potential network,
+    description "Potential topology. There may be optionally one or
+                 multiple instances of the potential network,
                  related to the current network";
   }
 
   identity network-category-intended {
     base "st:network-category";
-    description "Intended topology, there is optionally 1 instance of intended network related to the live network
-                 instance";
+    description "Intended topology, there is optionally 1 instance of
+                 intended network related to the live network instance";
   }
 
   augment "/nw:networks/nw:network" {
 
     description
-      "Adding optional capability for modelling of potential and intended network";
+      "Adding optional capability for modelling of potential and
+      intended network";
 
     leaf network-category {
       type identityref {
         base st:network-category;
       }
       description
-        "The network category: live, potential, intended. Default is live.";
+        "The network category: live, potential, intended.
+        Default is live.";
     }
     leaf live-network-ref {
       description
-        "Required for potential and intended only to connect to the live network instance";
+        "Required for potential and intended only to connect to the
+        live network instance";
        type leafref {
          path "/nw:networks/nw:network/nw:network-id";
        require-instance false;
@@ -1083,7 +1245,8 @@ module ietf-simap-topology {
     }
     leaf timestamp {
       description
-        "Required for potential only to find related  historical snapshot";
+        "Required for potential only to find related  historical
+        snapshot";
       type yang:date-and-time;
     }
   }
@@ -1110,8 +1273,12 @@ module ietf-simap-topology {
     description "Bidirectional link";
   }
 
+  /*
+   * Identities related to link type and cardinality of points
+   */
   identity link-type {
-      description "Base identity for the internal structure of the link";
+      description 
+        "Base identity for the internal structure of the link";
   }
 
   identity link-type-p2p {
@@ -1129,8 +1296,14 @@ module ietf-simap-topology {
       description "Multi-point to multi-point link";
   }
 
+  identity link-type-hybrid {
+      base "st:link-type";
+      description "Hybrid links, combination of the other three";
+  }
+
   /*
-   * Identities related to termination point directionality and role in the link
+   * Identities related to termination point directionality and role
+   * in the link
    */
 
   identity tp-direction {
@@ -1154,16 +1327,17 @@ module ietf-simap-topology {
 
   augment "/nw:networks/nw:network/nt:link" {
     description
-      "Models the link that can be unidirectional, bidirectional, point-to-point,
-      point-to-multi-point, multipoint-to-multipoint, therefore addressing requirements:
+      "Models the link that can be unidirectional, bidirectional,
+      point-to-point,point-to-multi-point, multipoint-to-multipoint,
+      therefore addressing requirements:
       - REQ-BIDIR
       - REQ-MULTI-POINT
 
-      with augmenting we keep source and destination for backward compatibility (APPROACH-AUGMENT, APPROACH-BIS),
-      if different approach (APPROACH-NEW) is selected source and destination are not needed any more.
+      with augmenting we keep source and destination for backward
+      compatibility.
 
-      Allows for the link to terminate on the termination point that is on another network, therefore
-      addressing the gap:
+      Allows for the link to terminate on the termination point that is
+      on another network, therefore also addressing the gap:
       - REQ-MULTI-DOMAIN
       ";
 
@@ -1172,12 +1346,13 @@ module ietf-simap-topology {
         base st:link-type;
       }
       description
-        "The reference to the specification for the internal structure of the link.
-         It can be point to point (link-type-p2p), point to multipoint (link-type-p2mp) or
-         multipoint to multipoint (link-type-mp2mp).
-         It can also be any other custom identity defined with base link-type.
-         It is optional, so the model supports the solution without the link type information,
-         either if not known or for backward compatible case.";
+        "The reference to the specification for the internal structure
+        of the link. It can be point to point (link-type-p2p), point to
+        multipoint (link-type-p2mp) or multipoint to multipoint
+        (link-type-mp2mp). It can also be any other custom identity
+        defined with base link-type. It is optional, so the model
+        supports the solution without the link type information,
+        either if not known or for backward compatible case.";
     }
 
     leaf link-direction {
@@ -1185,10 +1360,12 @@ module ietf-simap-topology {
         base st:link-direction;
       }
       description
-        "The direction of the link: unidirectional (link-direction-uni) or bidirectional (link-direction-bi).
-         It can also be any other custom identity defined with base link-direction.
-         It is optional, so the model supports the solution without the link direction information,
-         either if not known or for backward compatible case.";
+        "The direction of the link: unidirectional (link-direction-uni)
+        or bidirectional (link-direction-bi). It can also be any other
+        custom identity defined with base link-direction. It is
+        optional, so the model supports the solution without the link
+        direction information, either if not known or for backward
+        compatible case.";
     }
 
     list tp {
@@ -1214,17 +1391,39 @@ module ietf-simap-topology {
     }
   }
 
+  /*
+   * Subnetworks, requirement REQ-SUBNETWORK
+   */
+  augment "/nw:networks/nw:network" {
+    list subnetwork {
+        key "network-ref";
+           description
+             "A subnetwork of the network, supports partitioning";
+           leaf network-ref {
+             type leafref {
+               path "/nw:networks/nw:network/nw:network-id";
+             require-instance false;
+             }
+             description
+               "References the subnetworks";
+           }
+    }
+  }
+
+  /*
+   * Networks history, requirement REQ-SNAPSHOT
+   */
+
   container networks-history {
     config false;
     list network-history {
       key "live-network-ref timestamp";
       description
-        "Historical network. Snapshot is generated for each historical instance, network-ref
-        is the reference for the live network";
+        "Historical network. Snapshot is generated for each historical
+        instance, network-ref is the reference for the live network";
       leaf live-network-ref {
          type leafref {
            path "/nw:networks/nw:network/nw:network-id";
-           require-instance false;
          }
       }
       leaf timestamp {
