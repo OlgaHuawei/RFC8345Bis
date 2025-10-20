@@ -244,7 +244,22 @@ module ietf-simap-topology {
 
   identity link-type-hybrid {
       base "st:link-type";
-      description "Hybrid links, combination of the other three";
+      description
+        "Hybrid links, combination of the other three"
+        The multi-point link is an abstraction of underlying structure
+        detail. The underlying structure is currently expressed in
+        terms of a simple identity which essentially references
+        a pattern of underlying flow where that pattern describes the
+        effect (another abstraction) of that flow between each point
+        of the link. There are currently a few well understood
+        patterns, but the list will expand. The list of patterns, not
+        surprisingly, will be the same as for  service, for
+        connectivity and for flow (as the link arises from them). The
+        approach of introduction of hybrid links allows for a
+        solution to express a complex arrangement in abstraction without
+        needing, for each instance, to lay out the detail. It also
+        allows the client application to “understand” the effect
+        without having to probe that detail.";
   }
 
   /*
@@ -354,6 +369,42 @@ module ietf-simap-topology {
                "References the subnetworks";
            }
      }
+  }
+
+  /*
+   * Candidate for graph traversal (REQ-GRAPH-TRAVERSAL)
+   * topology requirement (tp->tp, node->node)
+   */
+  augment "/nw:networks/nw:network/nw:node/nt:termination-point" {
+    description
+      "Adding optional read only link relations between connected
+termination points for optimized graph traversal for paths";
+
+    list linked-termination-point {
+      config false;
+      key "network-ref node-ref tp-ref";
+      description
+            "This list identifies any linked termination points, added
+             optionally for read only for optimized path graph
+             traversal";
+
+      uses nt:tp-ref;
+  }
+
+  augment "/nw:networks/nw:network/nw:node" {
+    description
+      "Adding optional read only link relations between connected
+nodes for optimized graph traversal for paths";
+
+    list linked-node {
+      config false;
+      key "network-ref node-ref";
+      description
+            "This list identifies any linked nodes, added
+             optionally for read only for optimized path graph
+             traversal";
+
+      uses nw:node-ref;
   }
 
   /*
