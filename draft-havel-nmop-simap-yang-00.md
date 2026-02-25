@@ -66,7 +66,7 @@ how to model and propose the implementation solutions.
 {{!I-D.ietf-nmop-simap-concept}} defines Service & Infrastructure 
 Maps (SIMAP) as a data model that provides a view of the operator's 
 networks and services, including how it is connected to other 
-models/data (e.g., inventory, observability sources, and operational 
+models (e.g., inventory), and data (e.g., observability data, operational 
 knowledge). It specifically provides an approach to model 
 multi-layered topology and an appropriate mechanism to navigate 
 amongst layers and correlate between them. This includes layers from 
@@ -278,8 +278,8 @@ presented in {{REQ-BIDIR}}.
 multipoint  links. Gap: complex. Analysis and solution presented in 
 {{REQ-MULTI-POINT}}.
     * REQ-MULTI-DOMAIN: SIMAP must provide a mechanism to model links 
-between networks. Analysis and solution presented in 
-{{REQ-MULTI-DOMAIN}}.
+and nodes between networks. Analysis and solution presented in 
+{{REQ-MULTI-DOMAIN-LINK}} and {{REQ-MULTI-DOMAIN-NODE}}.
     * REQ-SUBNETWORK: SIMAP must provide a mechanism to model network 
 decomposition into sub-networks. Analysis and solution presented in 
 {{REQ-SUBNETWORK}}.
@@ -340,8 +340,6 @@ if they can be supported by RFC8345:
 * Operator Requirements:
     * REQ-TOPOLOGY-ABSTRACTION: Navigation across the abstraction 
 levels inside a single network layer
-    * REQ-SHARED: Share nodes, links, and termination points between 
-different networks.
 
 The following requirements have to be analyzed further to capture all 
 generic networking semantics missing from RFC8345 and from additional 
@@ -579,7 +577,7 @@ the list network:
 ~~~~
 {: #REQ-SNAPSHOT-YANG-1 title="The candidate 2 for historical snapshots"}
 
-* Candidate 3 - SIMAP Specific Solution via separate contaimers" 
+* Candidate 3 - SIMAP Specific Solution via separate containers" 
      * implemented via separate container, for read only. Instead of 
 referencing the file, the whole yang structure for the network from 
 the list-network is duplicated, except that all supporting references 
@@ -1136,7 +1134,7 @@ make sense to define rules? For example:
 supported)
 
 
-## REQ-MULTI-DOMAIN: Multi-domain Links {#REQ-MULTI-DOMAIN}
+## REQ-MULTI-DOMAIN: Multi-domain Links {#REQ-MULTI-DOMAIN-LINK}
 
 ### Analysis
 
@@ -1156,7 +1154,7 @@ between them
 Allows the link to terminate on the termination point that is
 on another network.
 
-{: #REQ-MULTI-DOMAIN-YANG}
+{: #REQ-MULTI-DOMAIN-LINK-YANG}
 ~~~~
 
   augment "/nw:networks/nw:network/nt:link" {
@@ -1167,14 +1165,31 @@ on another network.
     }
   }
 ~~~~
-{: #REQ-MULTI-DOMAIN-YANG title="The proposal for multi-domain links"}
+{: #REQ-MULTI-DOMAIN-LINK-YANG title="The proposal for multi-domain links"}
 
-This way we can model the links in 2 ways:
-- link belongs to one network (e.g. IS-IS Area) but pointing to remote 
-point of another network (e.g. IS-IS Area)
-- link belongs to the parent domain (e.g. IS-IS AS Domain), but 
-points to termination points of children domains (e.g. different 
-IS-IS Areas)
+This way we can model the links in the following ways:
+1. link belongs to one network (e.g. IS-IS Area A) but pointing to remote 
+point of another network (e.g. IS-IS Area B)
+2. link belongs to the parent domain (e.g. IS-IS AS Domain), but 
+points to termination points of children domains (e.g.  
+IS-IS Area A and IS-IS Area B)
+
+
+## REQ-MULTI-DOMAIN: Multi-domain Nodes {#REQ-MULTI-DOMAIN-NODE}
+
+### Analysis
+Nodes shared between multiple domains is the common 
+concept in network topology (e.g. Area Border Routers that connect different areas in OSPF). 
+SIMAP must provide a mechanism to model nodes shared between networks.
+
+* RFC8345 defines all nodes as belonging to one network instance, 
+not allowing to have a node inside the 2 networks.
+* This does not allow for links between networks in the case of  
+multi-domains or partitioning.
+* The only way would be to model a node with 2 instances, one per area 
+
+### Implementation Proposal
+For further study
 
 ## REQ-SUBNETWORK: Subnetworks and partitioning {#REQ-SUBNETWORK}
 
