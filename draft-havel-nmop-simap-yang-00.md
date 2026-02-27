@@ -308,6 +308,36 @@ relationships inside each layer or between the layers
 historical data. Analysis and solution presented in 
 {{REQ-TEMPO}}.
 
+## Features for RFC8345 Gaps {#gap-requirements-features}
+
+Based on the initial analysis, we identified that the requirements can be split into the following features
+* SIMAP Core. These are the core requirements for the SIMAP, applicable to the current topology snapshot and needed to support the core SIMAP model
+	* REQ-BIDIR
+	* REQ-MULTI-POINT
+	* REQ-MULTI-DOMAIN
+	* REQ-SUBNETWORK
+	* REQ-SEMANTIC
+	* REQ-EXTENSIBLE
+	* REQ-PROPERTIES
+	* REQ-SUPPORTING
+	* REQ-RELATIONSHIPS
+
+* SIMAP Lifecycle. These are the requirements for modelling the lifecycle of the topology, including
+intended topology, potential topology, historical snapshots and relations between them.
+	* REQ-PROG-OPEN-MODEL
+	* REQ-SNAPSHOT
+	* REQ-POTENTIAL
+	* REQ-INTENDED
+	* REQ-STATUS
+	* REQ-TEMPO-HISTO
+
+* SIMAP External Link. These are the requirements for linking the external models and data
+	* REQ-STD-API-BASED
+	* REQ-PLUGG
+
+* SIMAP Navigation. These are the requirements for navigation of SIMAP
+	* REQ-GRAPH-TRAVERSAL
+   
 ### Requirements to keep in mind when modelling gaps {#model-reqs}
 Any extensions/modifications must keep the original RFC8345 approach 
 as  simple as possible and fully generic and technology and layer 
