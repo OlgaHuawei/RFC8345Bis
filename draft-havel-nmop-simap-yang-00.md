@@ -193,12 +193,15 @@ supported by {{!RFC8345}}.
 The following requirements are generic interface requirements and do 
 not impact SIMAP modelling:
 
-* Architectural Requirements:
-
-    * REQ-CONDITIONAL: Provide capability for conditional retrieval  
+* Design Requirements:
+  
+      * REQ-CONDITIONAL: Provide capability for conditional retrieval  
 of parts of SIMAP. The NETCONF/RESTCONF and YANG support conditional 
 retrieval. In the case that more advanced queries are needed, 
 alternative query interface may be required.
+	
+* Architectural Requirements:
+
     * REQ-SCALES: The SIMAP API must be scalable.
     * REQ-PERFORMANCE: The SIMAP API must be  performant.
     * REQ-SECURITY:	The conventional NACM control access rules 
@@ -254,10 +257,10 @@ modifications:
 and  snapshots part. Analysis and solution presented in 
 {{REQ-PROG-OPEN-MODEL}}.
     * REQ-STD-API-BASED: Standard based SIMAP models and APIs, for  
-multi-vendor support. Gap: links are entities, 
-adding linkedTo relations would help. Analysis and solution presented in 
+multi-vendor support. Gap: link to external models. Analysis and solution presented in 
 {{REQ-STD-API-BASED}}.
-    * REQ-GRAPH-TRAVERSAL: Graph Traversal. Analysis and solution 
+    * REQ-GRAPH-TRAVERSAL: Graph Traversal. Gap: links are entities, 
+adding linkedTo relations would help. Analysis and solution 
 presented in {{REQ-GRAPH-TRAVERSAL}}.
     * REQ-SNAPSHOT: Network snapshot topology. Analysis and solution 
 presented in {{REQ-SNAPSHOT}}.
@@ -851,7 +854,7 @@ The following is also missing from the model:
 
 
 ### Implementation Proposal
-For further analysis
+For further study, implement different candidates via hackathon
 
 ## REQ-EXTENSIBLE: Extensible via metadata {#REQ-EXTENSIBLE}
 
@@ -875,7 +878,7 @@ to  supporting relations:
         unknown extensions. Proposed solution for SIMAP requirement
         REQ-EXTENSIBLE. Any additional info that is topologically
         significant can also be added this way for requirement
-        REQ-TOPO-ONLY or REQ-PROPERTIES.";
+        REQ-SEMANTIC or REQ-PROPERTIES.";
     }
 
 ~~~~
@@ -1184,12 +1187,14 @@ SIMAP must provide a mechanism to model nodes shared between networks.
 
 * RFC8345 defines all nodes as belonging to one network instance, 
 not allowing to have a node inside the 2 networks.
-* This does not allow for links between networks in the case of  
+* This does not allow for sharing a node between networks in the case of  
 multi-domains or partitioning.
-* The only way would be to model a node with 2 instances, one per area 
+* Current approach is to either:
+	* model a node with 2 instances, one per domain, which in the case of OSPF would not reflect the topology
+ 	* have the same instance in 2 networks, only if node-id is unique on all nodes in all networks
 
 ### Implementation Proposal
-For further study
+For further study, implement different candidates via hackathon
 
 ## REQ-SUBNETWORK: Subnetworks and partitioning {#REQ-SUBNETWORK}
 
@@ -1271,7 +1276,7 @@ and link and topology, but via a new underlay topology and not via
 the core supporting relationship.
 
 ### Implementation Proposal
-Propose the implementation.
+For further study, implement different candidates via hackathon
 
 ## REQ-STATUS: Links and nodes down in topology {#REQ-STATUS}
 
@@ -1364,7 +1369,7 @@ compatibility.
 Move any relevant text from draft draft-havel-nmop-digital-map.
 
 ### Implementation Proposal
-Propose the implementation.
+For further study, implement different candidates via hackathon
 
 ## REQ-TEMPO-HISTORY: Geo-spatial, temporal, historical {#REQ-TEMPO}
 
@@ -1381,7 +1386,7 @@ In regards to geo-spatial, there are 2 options:
 This draft proposes to link to the external
 
 ### Implementation Proposal
-Propose the implementation
+For further study, implement different candidates via hackathon
 
 # Model Structure Details
 
