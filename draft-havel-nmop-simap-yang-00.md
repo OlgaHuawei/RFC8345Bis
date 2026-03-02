@@ -452,7 +452,45 @@ potential, historical, and intended instances. Such an approach
 supports advanced use cases that require the model to explicitly 
 represent these semantics.
 
+## SIMAP Features
 
+We are introducing a set of SIMAP features that will be used to group requirements
+and optionally include them in the SIMAP module if the feature is implemented.
+Definitions will be tagged with the feature name and are only valid on a SIMAP server that supports that feature.
+
+The following is the initial set of SIMAP features:
+
+{: #SIMAP-FEATURES}
+~~~~
+module ietf-simap-topology {
+    /* … other statements … */
+
+	feature simap-core-topology {
+		description
+		    "This feature indicates that the SIMAP server supports those SIMAP
+			 requirements not supported by RFC8345, but related to core live topology";
+	}
+
+	feature simap-lifecycle {
+		description
+		    "This feature indicates that the SIMAP server supports those SIMAP
+			 requirements not supported by RFC8345, but related to the overall SIMAP
+             lifecycle, including intent, potential (for what-if) and historical snapshots";
+	}
+
+	feature simap-external {
+		description
+		    "This feature indicates that the SIMAP server supports those SIMAP
+			 requirements not supported by RFC8345, but related to connecting SIMAP
+             to external models and data";
+	}
+
+    /* … other statements … */
+}
+{: #SIMAP-FEATURES title="The SIMAP Features"}
+
+Please note that the simap-core-topology feature may be further split during the further
+analysis and reviews of the SIMAP module.
 
 # Solution Proposal for the RFC8345 Gaps
 
