@@ -492,6 +492,10 @@ module ietf-simap-topology {
 Please note that the simap-core-topology feature may be further split during the further
 analysis and reviews of the SIMAP module.
 
+The following is the proposed features and SIMAP requirements that we will model
+in this document:
+
+
 # Solution Proposal for the RFC8345 Gaps
 
 ## REQ-PROG-OPEN-MODEL: Open and Programmable {#REQ-PROG-OPEN-MODEL}
@@ -1407,18 +1411,21 @@ compatibility.
     description "A reusable set of optional extensions for network,
                  node, termination point and link";
     leaf name {
+	  if-feature simap-usability;
       type string;
       description
         "The user friendly name, if required.
         It is optional, for backward compatibility";
     }
     leaf-list label {
+	  if-feature simap-usability;
       type string;
       description
         "Used for optionally adding any labels to the instances,
          if required";
     }
     leaf description {
+	  if-feature simap-usability;
       type string;
       description
         "Used for optionally adding any description to the instances,
@@ -1434,7 +1441,12 @@ compatibility.
 ## REQ-RELATIONSHIPS: Relationships significant for topology {#REQ-REL}
 
 ### Analysis
-Move any relevant text from draft draft-havel-nmop-digital-map.
+The following relations are already supported by RFC8345:
+
+* containment
+	* networks contain nodes
+	* nodes contain termination points
+	
 
 ### Implementation Proposal
 For further study, implement different candidates via hackathon
@@ -1454,7 +1466,8 @@ In regards to geo-spatial, there are 2 options:
 This draft proposes to link to the external
 
 ### Implementation Proposal
-For further study, implement different candidates via hackathon
+Proposal for historical is done via REQ-SNAPSHOT
+Proposal for 
 
 # Model Structure Details
 
@@ -1591,7 +1604,7 @@ module ietf-simap-topology {
   /*
    * Common SIMAP groupings for optional RFC8345 extensions
    * Addressing requirements REQ-PROPERTIES as name, label and
-   *  description may be important properties that
+   * description may be important properties that
    * clarify the topological roles for different layers and technologies
    */
   grouping simap-common {
