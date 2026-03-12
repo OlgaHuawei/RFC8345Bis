@@ -222,7 +222,7 @@ service layer.
 different views to different stakeholders.
     * REQ-PASSIVE-TOPO: Topology includes passive topology.
     * REQ-COMMON-API: Common SIMAP models and APIs, for multi domain.
-    * REQ-LIVE: Live network topology.
+    * REQ-LIVE: Live network topology. TODO: Check if createTime / updatedTime / deletedTime is here or somewhere else. 
     * REQ-LAYER-NAVIGATE: Navigation inside the topology layer and  
 between the topology layers
     * REQ-DATA-PLANE-FLOW: Provider data plane (Flow) needs to be  
@@ -352,7 +352,7 @@ and termination point entity types.
     * REQ-LAYERED-MODEL: Topology layers from physical layer up to 
 service layer.
     * REQ-COMMON-API: Common SIMAP models and APIs, for multi domain.
-    * REQ-LIVE: Live network topology.
+    * REQ-LIVE: Live network topology. TODO: Check if createTime / updatedTime / deletedTime is here or somewhere else. 
     * REQ-LAYER-NAVIGATE: Navigation inside the topology layer and 
 between the topology layers
 
@@ -1434,6 +1434,8 @@ compatibility.
     anydata extension {
     :
     :
+
+	TODO: Check if createTime / updatedTime / deletedTime is here or somewhere else. 
   }
 ~~~~
 {: #REQ-PROPERTIES-YANG title="The proposal for bidirectional links"}
