@@ -66,7 +66,7 @@ how to model and propose the implementation solutions.
 {{!I-D.ietf-nmop-simap-concept}} defines Service & Infrastructure 
 Maps (SIMAP) as a data model that provides a view of the operator's 
 networks and services, including how it is connected to other 
-models/data (e.g., inventory, observability sources, and operational 
+models (e.g., inventory), and data (e.g., observability data, operational 
 knowledge). It specifically provides an approach to model 
 multi-layered topology and an appropriate mechanism to navigate 
 amongst layers and correlate between them. This includes layers from 
@@ -193,12 +193,15 @@ supported by {{!RFC8345}}.
 The following requirements are generic interface requirements and do 
 not impact SIMAP modelling:
 
-* Architectural Requirements:
-
-    * REQ-CONDITIONAL: Provide capability for conditional retrieval  
+* Design Requirements:
+  
+      * REQ-CONDITIONAL: Provide capability for conditional retrieval  
 of parts of SIMAP. The NETCONF/RESTCONF and YANG support conditional 
 retrieval. In the case that more advanced queries are needed, 
 alternative query interface may be required.
+	
+* Architectural Requirements:
+
     * REQ-SCALES: The SIMAP API must be scalable.
     * REQ-PERFORMANCE: The SIMAP API must be  performant.
     * REQ-SECURITY:	The conventional NACM control access rules 
@@ -219,7 +222,7 @@ service layer.
 different views to different stakeholders.
     * REQ-PASSIVE-TOPO: Topology includes passive topology.
     * REQ-COMMON-API: Common SIMAP models and APIs, for multi domain.
-    * REQ-LIVE: Live network topology.
+    * REQ-LIVE: Live network topology. TODO: Check if createTime / updatedTime / deletedTime is here or somewhere else. 
     * REQ-LAYER-NAVIGATE: Navigation inside the topology layer and  
 between the topology layers
     * REQ-DATA-PLANE-FLOW: Provider data plane (Flow) needs to be  
@@ -254,10 +257,10 @@ modifications:
 and  snapshots part. Analysis and solution presented in 
 {{REQ-PROG-OPEN-MODEL}}.
     * REQ-STD-API-BASED: Standard based SIMAP models and APIs, for  
-multi-vendor support. Gap: links are entities, 
-adding linkedTo relations would help. Analysis and solution presented in 
+multi-vendor support. Gap: link to external models. Analysis and solution presented in 
 {{REQ-STD-API-BASED}}.
-    * REQ-GRAPH-TRAVERSAL: Graph Traversal. Analysis and solution 
+    * REQ-GRAPH-TRAVERSAL: Graph Traversal. Gap: links are entities, 
+adding linkedTo relations would help. Analysis and solution 
 presented in {{REQ-GRAPH-TRAVERSAL}}.
     * REQ-SNAPSHOT: Network snapshot topology. Analysis and solution 
 presented in {{REQ-SNAPSHOT}}.
@@ -278,8 +281,8 @@ presented in {{REQ-BIDIR}}.
 multipoint  links. Gap: complex. Analysis and solution presented in 
 {{REQ-MULTI-POINT}}.
     * REQ-MULTI-DOMAIN: SIMAP must provide a mechanism to model links 
-between networks. Analysis and solution presented in 
-{{REQ-MULTI-DOMAIN}}.
+and nodes between networks. Analysis and solution presented in 
+{{REQ-MULTI-DOMAIN-LINK}} and {{REQ-MULTI-DOMAIN-NODE}}.
     * REQ-SUBNETWORK: SIMAP must provide a mechanism to model network 
 decomposition into sub-networks. Analysis and solution presented in 
 {{REQ-SUBNETWORK}}.
@@ -305,6 +308,36 @@ relationships inside each layer or between the layers
 historical data. Analysis and solution presented in 
 {{REQ-TEMPO}}.
 
+## Features for RFC8345 Gaps {#gap-requirements-features}
+
+Based on the initial analysis, we identified that the requirements can be split into the following features
+* SIMAP Core. These are the core requirements for the SIMAP, applicable to the current topology snapshot and needed to support the core SIMAP model
+	* REQ-BIDIR
+	* REQ-MULTI-POINT
+	* REQ-MULTI-DOMAIN
+	* REQ-SUBNETWORK
+	* REQ-SEMANTIC
+	* REQ-EXTENSIBLE
+	* REQ-PROPERTIES
+	* REQ-SUPPORTING
+	* REQ-RELATIONSHIPS
+
+* SIMAP Lifecycle. These are the requirements for modelling the lifecycle of the topology, including
+intended topology, potential topology, historical snapshots and relations between them.
+	* REQ-PROG-OPEN-MODEL
+	* REQ-SNAPSHOT
+	* REQ-POTENTIAL
+	* REQ-INTENDED
+	* REQ-STATUS
+	* REQ-TEMPO-HISTO
+
+* SIMAP External Link. These are the requirements for linking the external models and data
+	* REQ-STD-API-BASED
+	* REQ-PLUGG
+
+* SIMAP Navigation. These are the requirements for navigation of SIMAP
+	* REQ-GRAPH-TRAVERSAL
+   
 ### Requirements to keep in mind when modelling gaps {#model-reqs}
 Any extensions/modifications must keep the original RFC8345 approach 
 as  simple as possible and fully generic and technology and layer 
@@ -319,7 +352,7 @@ and termination point entity types.
     * REQ-LAYERED-MODEL: Topology layers from physical layer up to 
 service layer.
     * REQ-COMMON-API: Common SIMAP models and APIs, for multi domain.
-    * REQ-LIVE: Live network topology.
+    * REQ-LIVE: Live network topology. TODO: Check if createTime / updatedTime / deletedTime is here or somewhere else. 
     * REQ-LAYER-NAVIGATE: Navigation inside the topology layer and 
 between the topology layers
 
@@ -340,8 +373,6 @@ if they can be supported by RFC8345:
 * Operator Requirements:
     * REQ-TOPOLOGY-ABSTRACTION: Navigation across the abstraction 
 levels inside a single network layer
-    * REQ-SHARED: Share nodes, links, and termination points between 
-different networks.
 
 The following requirements have to be analyzed further to capture all 
 generic networking semantics missing from RFC8345 and from additional 
@@ -421,6 +452,48 @@ potential, historical, and intended instances. Such an approach
 supports advanced use cases that require the model to explicitly 
 represent these semantics.
 
+## SIMAP Features
+
+We are introducing a set of SIMAP features that will be used to group requirements
+and optionally include them in the SIMAP module if the feature is implemented.
+Definitions will be tagged with the feature name and are only valid on a SIMAP server that supports that feature.
+
+The following is the initial set of SIMAP features:
+
+{: #SIMAP-FEATURES}
+~~~~
+module ietf-simap-topology {
+    /* … other statements … */
+
+	feature simap-core-topology {
+		description
+		    "This feature indicates that the SIMAP server supports those SIMAP
+			 requirements not supported by RFC8345, but related to core live topology";
+	}
+
+	feature simap-lifecycle {
+		description
+		    "This feature indicates that the SIMAP server supports those SIMAP
+			 requirements not supported by RFC8345, but related to the overall SIMAP
+             lifecycle, including intent, potential (for what-if) and historical snapshots";
+	}
+
+	feature simap-external {
+		description
+		    "This feature indicates that the SIMAP server supports those SIMAP
+			 requirements not supported by RFC8345, but related to connecting SIMAP
+             to external models and data";
+	}
+
+    /* … other statements … */
+}
+{: #SIMAP-FEATURES title="The SIMAP Features"}
+
+Please note that the simap-core-topology feature may be further split during the further
+analysis and reviews of the SIMAP module.
+
+The following is the proposed features and SIMAP requirements that we will model
+in this document:
 
 
 # Solution Proposal for the RFC8345 Gaps
@@ -579,7 +652,7 @@ the list network:
 ~~~~
 {: #REQ-SNAPSHOT-YANG-1 title="The candidate 2 for historical snapshots"}
 
-* Candidate 3 - SIMAP Specific Solution via separate contaimers" 
+* Candidate 3 - SIMAP Specific Solution via separate containers" 
      * implemented via separate container, for read only. Instead of 
 referencing the file, the whole yang structure for the network from 
 the list-network is duplicated, except that all supporting references 
@@ -853,7 +926,7 @@ The following is also missing from the model:
 
 
 ### Implementation Proposal
-For further analysis
+For further study, implement different candidates via hackathon
 
 ## REQ-EXTENSIBLE: Extensible via metadata {#REQ-EXTENSIBLE}
 
@@ -877,7 +950,7 @@ to  supporting relations:
         unknown extensions. Proposed solution for SIMAP requirement
         REQ-EXTENSIBLE. Any additional info that is topologically
         significant can also be added this way for requirement
-        REQ-TOPO-ONLY or REQ-PROPERTIES.";
+        REQ-SEMANTIC or REQ-PROPERTIES.";
     }
 
 ~~~~
@@ -1136,7 +1209,7 @@ make sense to define rules? For example:
 supported)
 
 
-## REQ-MULTI-DOMAIN: Multi-domain Links {#REQ-MULTI-DOMAIN}
+## REQ-MULTI-DOMAIN: Multi-domain Links {#REQ-MULTI-DOMAIN-LINK}
 
 ### Analysis
 
@@ -1156,7 +1229,7 @@ between them
 Allows the link to terminate on the termination point that is
 on another network.
 
-{: #REQ-MULTI-DOMAIN-YANG}
+{: #REQ-MULTI-DOMAIN-LINK-YANG}
 ~~~~
 
   augment "/nw:networks/nw:network/nt:link" {
@@ -1167,14 +1240,33 @@ on another network.
     }
   }
 ~~~~
-{: #REQ-MULTI-DOMAIN-YANG title="The proposal for multi-domain links"}
+{: #REQ-MULTI-DOMAIN-LINK-YANG title="The proposal for multi-domain links"}
 
-This way we can model the links in 2 ways:
-- link belongs to one network (e.g. IS-IS Area) but pointing to remote 
-point of another network (e.g. IS-IS Area)
-- link belongs to the parent domain (e.g. IS-IS AS Domain), but 
-points to termination points of children domains (e.g. different 
-IS-IS Areas)
+This way we can model the links in the following ways:
+1. link belongs to one network (e.g. IS-IS Area A) but pointing to remote 
+point of another network (e.g. IS-IS Area B)
+2. link belongs to the parent domain (e.g. IS-IS AS Domain), but 
+points to termination points of children domains (e.g.  
+IS-IS Area A and IS-IS Area B)
+
+
+## REQ-MULTI-DOMAIN: Multi-domain Nodes {#REQ-MULTI-DOMAIN-NODE}
+
+### Analysis
+Nodes shared between multiple domains is the common 
+concept in network topology (e.g. Area Border Routers that connect different areas in OSPF). 
+SIMAP must provide a mechanism to model nodes shared between networks.
+
+* RFC8345 defines all nodes as belonging to one network instance, 
+not allowing to have a node inside the 2 networks.
+* This does not allow for sharing a node between networks in the case of  
+multi-domains or partitioning.
+* Current approach is to either:
+	* model a node with 2 instances, one per domain, which in the case of OSPF would not reflect the topology
+ 	* have the same instance in 2 networks, only if node-id is unique on all nodes in all networks
+
+### Implementation Proposal
+For further study, implement different candidates via hackathon
 
 ## REQ-SUBNETWORK: Subnetworks and partitioning {#REQ-SUBNETWORK}
 
@@ -1256,7 +1348,7 @@ and link and topology, but via a new underlay topology and not via
 the core supporting relationship.
 
 ### Implementation Proposal
-Propose the implementation.
+For further study, implement different candidates via hackathon
 
 ## REQ-STATUS: Links and nodes down in topology {#REQ-STATUS}
 
@@ -1319,18 +1411,21 @@ compatibility.
     description "A reusable set of optional extensions for network,
                  node, termination point and link";
     leaf name {
+	  if-feature simap-usability;
       type string;
       description
         "The user friendly name, if required.
         It is optional, for backward compatibility";
     }
     leaf-list label {
+	  if-feature simap-usability;
       type string;
       description
         "Used for optionally adding any labels to the instances,
          if required";
     }
     leaf description {
+	  if-feature simap-usability;
       type string;
       description
         "Used for optionally adding any description to the instances,
@@ -1339,6 +1434,8 @@ compatibility.
     anydata extension {
     :
     :
+
+	TODO: Check if createTime / updatedTime / deletedTime is here or somewhere else. 
   }
 ~~~~
 {: #REQ-PROPERTIES-YANG title="The proposal for bidirectional links"}
@@ -1346,10 +1443,15 @@ compatibility.
 ## REQ-RELATIONSHIPS: Relationships significant for topology {#REQ-REL}
 
 ### Analysis
-Move any relevant text from draft draft-havel-nmop-digital-map.
+The following relations are already supported by RFC8345:
+
+* containment
+	* networks contain nodes
+	* nodes contain termination points
+	
 
 ### Implementation Proposal
-Propose the implementation.
+For further study, implement different candidates via hackathon
 
 ## REQ-TEMPO-HISTORY: Geo-spatial, temporal, historical {#REQ-TEMPO}
 
@@ -1366,7 +1468,8 @@ In regards to geo-spatial, there are 2 options:
 This draft proposes to link to the external
 
 ### Implementation Proposal
-Propose the implementation
+Proposal for historical is done via REQ-SNAPSHOT
+Proposal for 
 
 # Model Structure Details
 
@@ -1503,7 +1606,7 @@ module ietf-simap-topology {
   /*
    * Common SIMAP groupings for optional RFC8345 extensions
    * Addressing requirements REQ-PROPERTIES as name, label and
-   *  description may be important properties that
+   * description may be important properties that
    * clarify the topological roles for different layers and technologies
    */
   grouping simap-common {
