@@ -1,14 +1,14 @@
 ---
 title: "A YANG Data Model for SIMAP"
 abbrev: SIMAP YANG Model
-docname: draft-havel-nmop-simap-yang-00
+docname: draft-havel-nmop-simap-yang-01
 category: info
 
 submissiontype: IETF 
 number:
 date:
 consensus: true
-v: 0
+v: 1
 area: "Operations and Management"
 workgroup: "Network Management Operations"
 keyword:
