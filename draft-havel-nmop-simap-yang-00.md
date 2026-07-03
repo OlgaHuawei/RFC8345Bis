@@ -28,11 +28,6 @@ author:
     email: ndavis@ciena.com
 
   -
-    fullname: Benoit Claise
-    org: Huawei
-    email: benoit.claise@huawei.com
-
-  -
     fullname: Oscar Gonzalez de Dios
     org: Telefonica
     email: oscar.gonzalezdedios@telefonica.com
@@ -64,15 +59,15 @@ how to model and propose the implementation solutions.
 # Introduction
 
 {{!I-D.ietf-nmop-simap-concept}} defines Service & Infrastructure 
-Maps (SIMAP) as a data model that provides a view of the operator's 
-networks and services, including how it is connected to other 
-models (e.g., inventory), and data (e.g., observability data, operational 
-knowledge). It specifically provides an approach to model 
-multi-layered topology and an appropriate mechanism to navigate 
-amongst layers and correlate between them. This includes layers from 
-physical topology to service topology. This model is applicable to 
-multiple domains (access, core, data center, etc.) and
-technologies (Optical, IP, etc.).
+Maps (SIMAP) as a data model that provides a topological view of the
+operator's networks and services, including how it is connected to
+other models (e.g., inventory) and external data sources (e.g.,
+observability data, and operational knowledge).  This model
+represents a multi-layered topology and offers mechanisms to navigate
+amongst layers and correlate between them, including layers from
+physical to service topology.  This model is applicable to multiple
+domains (access, core, data center, etc.) and technologies (Optical,
+IP, etc.).
 
 {{!I-D.ietf-nmop-simap-concept}} defines the requirements for SIMAP, 
 based on the Operator use cases. Some of the non-functional 
@@ -88,7 +83,8 @@ proposes the solution how to implement these gaps.
 # Terminology
 
 Terminology for SIMAP, SIMAP modelling, SIMAP data, topology, 
-topology layer, multi-layered topology is defined in {{!RFC8345}}
+topology layer, multi-layered topology is defined in 
+{{!I-D.ietf-nmop-simap-concept}} 
 
 # Why RFC8345 is a Good Approach for SIMAP Modelling
 
@@ -130,8 +126,8 @@ links and termination points must match underlay network
 
 Please note the following characteristics of the RFC 8345 topology model:
 
-* Network type is used to identify the layer; sub-layers are not 
-supported.
+* Network type is used to identify both the layers and technologies;
+sub-layers are not supported inside a single network.
 
 * Instantiation is flexible: a single network instance may represent 
 one or multiple layers.
@@ -149,8 +145,8 @@ destination. Bidirectional connectivity must be represented using
 two separate unidirectional links.
 
 * Layering relationships are expressed solely through the supporting 
-construct, without additional semantics such as underlay, 
-primary, backup, load-sharing, path, sequential, or parallel roles.
+construct, without additional semantics such as primary, backup,
+load-sharing, path, sequential, or parallel roles.
 
 * The supporting relationship is restricted to same-type entities only:
 (network->network, node->node, link->link, termination point -> 
@@ -164,7 +160,7 @@ The requirements from {{!I-D.ietf-nmop-simap-concept}} were further
 analyzed and split into 3 categories: 
 
 * {{generic-requirements}}: Generic Requirements
-    * these are generic SIMAP requirements for all YANG modules,
+    * these are generic SIMAP requirements for all YANG modules
 
 * {{supported-requirements}}: Requirements supported by RFC8345 
     * these are SIMAP requirements already supported by {{!RFC8345}} 
@@ -202,24 +198,37 @@ alternative query interface may be required.
 	
 * Architectural Requirements:
 
-    * REQ-SCALES: The SIMAP API must be scalable.
-    * REQ-PERFORMANCE: The SIMAP API must be  performant.
-    * REQ-SECURITY:	The conventional NACM control access rules 
-{{!RFC8341}} should apply
+    * REQ-SCALES: The SIMAP APIs and SIMAP server implementations must be
+      scalable, it must support any provider network, independent of its
+      size
+    * REQ-PERFORMANCE:   The SIMAP APIs and SIMAP server implementations
+      MUST support mechanisms that allow efficient retrieval of large
+      topologies, including incremental, filtered, or paginated access
+      to data.  Implementations SHOULD support streaming or
+      subscription-based mechanisms when appropriate to the protocol
+      binding, to avoid requiring full-dataset retrieval for every
+      request.
 
+      This requirement ensures that SIMAP can operate effectively in
+      environments with large-scale, multi-layer topologies without
+      mandating specific latency targets or performance metrics.
+    * REQ-SECURITY:	Any SIMAP interface MUST support strong client
+      authentication and authorization before granting access to SIMAP
+      operations and data.
+      
 ## Requirements supported by RFC8345 {#supported-requirements}
 
 Based on our initial analysis, the following SIMAP requirements are 
 already supported by RFC8345 and do not require any modelling 
 extensions/modifications to ietf-network and ietf-network-topology:
 
-* Operator Requirements: 
+* Functional Requirements: 
     * REQ-BASIC-MODEL-SUPPORT: Basic model with network, node, link, 
 and termination point entity types.
     * REQ-LAYERED-MODEL: Topology layers from physical layer up to  
 service layer.
-    * REQ-VIEWPOINTS: Different viewpoints provide capability to have 
-different views to different stakeholders.
+    * REQ-VIEWPOINTS: Different views to different
+      client applications. 
     * REQ-PASSIVE-TOPO: Topology includes passive topology.
     * REQ-COMMON-API: Common SIMAP models and APIs, for multi domain.
     * REQ-LIVE: Live network topology. TODO: Check if createTime / updatedTime / deletedTime is here or somewhere else. 
@@ -340,7 +349,7 @@ intended topology, potential topology, historical snapshots and relations betwee
    
 ### Requirements to keep in mind when modelling gaps {#model-reqs}
 Any extensions/modifications must keep the original RFC8345 approach 
-as  simple as possible and fully generic and technology and layer 
+as simple as possible and fully generic and technology and layer 
 agnostic. The following requirements are already supported in RFC8345,
 but we must keep them in mind when proposing implementation solutions 
 for gaps, as they are applicable to how we model the extensions / 
