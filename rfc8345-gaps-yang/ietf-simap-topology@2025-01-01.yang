@@ -245,7 +245,7 @@ module ietf-simap-topology {
   identity link-type-hybrid {
       base "st:link-type";
       description
-        "Hybrid links, combination of the other three"
+        "Hybrid links, combination of the other three.
         The multi-point link is an abstraction of underlying structure
         detail. The underlying structure is currently expressed in
         terms of a simple identity which essentially references
@@ -389,6 +389,7 @@ termination points for optimized graph traversal for paths";
              traversal";
 
       uses nt:tp-ref;
+    }
   }
 
   augment "/nw:networks/nw:network/nw:node" {
@@ -405,7 +406,9 @@ nodes for optimized graph traversal for paths";
              traversal";
 
       uses nw:node-ref;
-  }
+    }
+}
+
 
   /*
    * Networks history, requirement REQ-SNAPSHOT
@@ -431,4 +434,6 @@ nodes for optimized graph traversal for paths";
     }
   }
 }
+
+
 
